@@ -1,0 +1,426 @@
+#!/bin/sh
+#
+# A proxy script that executes bin/magento inside
+# the PHP docker container.
+
+# SCRIPTNAME contains the name
+# of the current script (e.g. "server")
+SCRIPTNAME="bin/$(basename $0)"
+
+# PROJECTPATH contains the full
+# directory path of the project itself
+PROJECTPATH=$(pwd)
+
+# CONFIGFOLDER contains the path
+# to the config folder.
+CONFIGFOLDER="$PROJECTPATH/config"
+
+# SSLCERTIFICATEFOLDER contains the path
+# to the SSL certificate folder that is used by Nginx.
+SSLCERTIFICATEFOLDER="$CONFIGFOLDER/nginx/ssl"
+
+# ENVIRONMENTVARIABLESFILE contains the path
+# to the file that holds the required environment
+# variables for this script.
+ENVIRONMENTVARIABLESFILE="$CONFIGFOLDER/env.sh"
+if [ ! -f $ENVIRONMENTVARIABLESFILE ]; then
+  echo >&2 "The file that holds the environment variables was not found at $ENVIRONMENTVARIABLESFILE"
+  exit 1
+fi
+
+# DOCKERCOMPOSEFILE contains the path
+# to the docker-compose.yml file
+DOCKERCOMPOSEFILE="$PROJECTPATH/docker-compose.yml"
+if [ ! -f $DOCKERCOMPOSEFILE ]; then
+  echo >&2 "The docker-compose file was not found at $DOCKERCOMPOSEFILE"
+  exit 1
+fi
+
+# execute the file that sets the environment variables
+. $ENVIRONMENTVARIABLESFILE
+
+# check the environment variables
+if [ -z "$DATABASE_NAME" ]; then
+  echo >&2 "The DATABASE_NAME variable is not set"
+  exit 1
+fi
+
+if [ -z "$DATABASE_USER" ]; then
+  echo >&2 "The DATABASE_USER variable is not set"
+  exit 1
+fi
+
+if [ -z "$DATABASE_PASSWORD" ]; then
+  echo >&2 "The DATABASE_PASSWORD variable is not set"
+  exit 1
+fi
+
+if [ -z "$DATABASE_ROOT_PASSWORD" ]; then
+  echo >&2 "The DATABASE_ROOT_PASSWORD variable is not set"
+  exit 1
+fi
+
+if [ -z "$ADMIN_USERNAME" ]; then
+  echo >&2 "The ADMIN_USERNAME variable is not set"
+  exit 1
+fi
+
+if [ -z "$ADMIN_FIRSTNAME" ]; then
+  echo >&2 "The ADMIN_FIRSTNAME variable is not set"
+  exit 1
+fi
+
+if [ -z "$ADMIN_LASTNAME" ]; then
+  echo >&2 "The ADMIN_LASTNAME variable is not set"
+  exit 1
+fi
+
+if [ -z "$ADMIN_EMAIL" ]; then
+  echo >&2 "The ADMIN_EMAIL variable is not set"
+  exit 1
+fi
+
+if [ -z "$ADMIN_PASSWORD" ]; then
+  echo >&2 "The ADMIN_PASSWORD variable is not set"
+  exit 1
+fi
+
+if [ -z "$DEFAULT_LANGUAGE" ]; then
+  echo >&2 "The DEFAULT_LANGUAGE variable is not set"
+  exit 1
+fi
+
+if [ -z "$DEFAULT_CURRENCY" ]; then
+  echo >&2 "The DEFAULT_CURRENCY variable is not set"
+  exit 1
+fi
+
+if [ -z "$DEFAULT_TIMEZONE" ]; then
+  echo >&2 "The DEFAULT_TIMEZONE variable is not set"
+  exit 1
+fi
+
+if [ -z "$BACKEND_FRONTNAME" ]; then
+  echo >&2 "The BACKEND_FRONTNAME variable is not set"
+  exit 1
+fi
+
+
+# Check availability of docker
+hash docker 2>/dev/null || { echo >&2 "$SCRIPTNAME requires \"docker\""; exit 1; }
+
+# Check availability of docker-compose
+hash docker-compose 2>/dev/null || { echo >&2 "$SCRIPTNAME requires \"docker-compose\""; exit 1; }
+
+
+#######################################
+# Execute bin/magento inside the php docker
+# container with all given arguments.
+# Globals:
+#   None
+# Arguments:
+#   *
+# Returns:
+#   None
+#######################################
+executeInDocker() {
+
+  if [ $(isRunning) = false ]; then
+    echo >&2 "Docker is not running. Please start the containers first.";
+    exit 1;
+  fi
+
+  # get the container name of the PHP container
+  phpContainerName=$(docker-compose ps -q | xargs docker inspect --format='{{ .Name }}' | sed 's:^/::g' | grep "php_")
+
+  # pass the arguments to the bin/magento script inside the PHP container
+  docker exec -it -u www-data $phpContainerName bash -c "bin/magento $*"
+}
+
+#######################################
+# Generate new SSL certificates
+# Globals:
+#   SSLKEYFILEPATH
+
+# Arguments:
+#   hostname
+# Returns:
+#   None
+#######################################
+generateSSLCertificate() {
+  # abort if no hostname was specified
+  hostname=$1
+  if [ -z "$hostname" ]; then
+    echo >&2 "No hostname given"
+    return 1
+  fi
+
+  # assemble file paths for key and cert
+  SSLKEYFILEPATH="$SSLCERTIFICATEFOLDER/key.pem"
+  SSLCERTFILEPATH="$SSLCERTIFICATEFOLDER/cert.pem"
+
+  # check if the certificates already exist
+  if [ -f "$SSLKEYFILEPATH" ] && [ -f "$SSLCERTFILEPATH" ]
+  then
+    echo "Using existing SSL certificates:"
+    printf "  %-8s%-30s\n" "Key:" $SSLKEYFILEPATH
+    printf "  %-8s%-30s\n" "Cert:" $SSLCERTFILEPATH
+    return 0
+  fi
+
+  # Check availability of openssl
+  hash openssl 2>/dev/null || {
+    echo >&2 "$SCRIPTNAME requires \"openssl\" to generate SSL certificates."
+    echo >&2 "Please install openssl or place the SSL certificate and key manually into the certificate-folder \"$SSLCERTIFICATEFOLDER\":"
+    printf >&2 "  %-8s%-30s\n" "Key:" $SSLKEYFILEPATH
+    printf >&2 "  %-8s%-30s\n" "Cert:" $SSLCERTFILEPATH
+    return 1
+  }
+
+  openssl req -x509 -newkey rsa:2048 -nodes -subj "/CN=$hostname" -keyout $SSLKEYFILEPATH -out $SSLCERTFILEPATH -days 360 2>/dev/null
+  if [ $? -ne 0 ]; then
+    echo >&2 "Generating SSL certificates failed."
+    echo >&2 "Please place the key and certificate into the certificate-folder \"$SSLCERTIFICATEFOLDER\":"
+    printf >&2 "  %-8s%-30s\n" "Key:" $SSLKEYFILEPATH
+    printf >&2 "  %-8s%-30s\n" "Cert:" $SSLCERTFILEPATH
+
+    return 1
+  fi
+
+  echo "Generated new SSL certificates for $hostname:"
+  printf "  %-8s%-30s\n" "Key:" $SSLKEYFILEPATH
+  printf "  %-8s%-30s\n" "Cert:" $SSLCERTFILEPATH
+  return 0
+}
+
+#######################################
+# Install Magento
+# Globals:
+#   DATABASE_NAME
+#   DATABASE_USER
+#   DATABASE_PASSWORD
+#   ADMIN_USERNAME
+#   ADMIN_FIRSTNAME
+#   ADMIN_LASTNAME
+#   ADMIN_EMAIL
+#   ADMIN_PASSWORD
+#   DEFAULT_LANGUAGE
+#   DEFAULT_CURRENCY
+#   DEFAULT_TIMEZONE
+#   BACKEND_FRONTNAME
+# Arguments:
+#   hostname
+# Returns:
+#   None
+#######################################
+installMagento() {
+
+  # get the hostname from the arguments
+  hostname=$1
+  if [ -z "$hostname" ]; then
+    echo >&2 "Please specify a hostname for your Magento shop (e.g. \"www.example.com\")\n"
+    echo >&2 "Usage:\n"
+    echo >&2 "  $SCRIPTNAME install www.example.com"
+
+    exit 1
+  fi
+
+  # generate a SSL certificate
+  generateSSLCertificate $hostname
+  if [ $? -ne 0 ]; then
+    exit 1
+  fi
+
+  # Add write permissions for pub folder
+  chmod -R g+w pub
+
+  # Start docker containers (docker-compose > v1.6 and docker > v1.10 required)
+  restart
+
+  # Delete config before install
+  rm -f app/etc/env.php
+
+  # wait for MySQL to come up
+  sleep 30
+
+  # Install magento 2
+  baseURLInsecure="http://${hostname}/"
+  baseURLSecure="https://${hostname}/"
+  backendURL="https://${hostname}/${BACKEND_FRONTNAME}"
+  executeInDocker setup:install --base-url=$baseURLInsecure --base-url-secure=$baseURLSecure --backend-frontname=${BACKEND_FRONTNAME} \
+                            --language=${DEFAULT_LANGUAGE} --currency=${DEFAULT_CURRENCY} --timezone=${DEFAULT_TIMEZONE} \
+                            --db-host=mysql --db-name=${DATABASE_NAME} --db-user=${DATABASE_USER} --db-password=${DATABASE_PASSWORD} \
+                            --admin-firstname=${ADMIN_FIRSTNAME} --admin-lastname=${ADMIN_LASTNAME} --admin-email=${ADMIN_EMAIL} --admin-user=${ADMIN_USERNAME} --admin-password=${ADMIN_PASSWORD} \
+                            --cleanup-database --session-save=db
+
+  # Install and update modules
+  executeInDocker setup:upgrade
+
+  # Clear cache
+  executeInDocker cache:clean
+
+  # Index data
+  executeInDocker indexer:reindex
+
+  # Print results
+  echo "\n"
+  echo "Installation complete.\n"
+
+  printf "%-15s%-30s\n" "Frontend" $baseURLInsecure
+  printf "%-15s%-30s\n" "Backend" $backendURL
+  printf "%-15s%s: %s\n" "" "Username" ${ADMIN_USERNAME}
+  printf "%-15s%s: %s\n" "" "Password" ${ADMIN_PASSWORD}
+
+}
+
+#######################################
+# Print the status of the server
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+#######################################
+status() {
+  if [ $(isRunning) = false ]; then
+    echo >&2 "Not running";
+    exit 1;
+  fi
+
+  # docker status
+  docker-compose -f $DOCKERCOMPOSEFILE ps -q | xargs docker inspect --format='{{ .Name }} {{ .State.Status }}' | sed 's:^/::g' | xargs printf "%-45s%-30s\n"
+
+}
+
+#######################################
+# Stop the server
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+#######################################
+stop() {
+
+  if [ $(isRunning) = true ]; then
+    # stop all docker containers
+    docker-compose -f $DOCKERCOMPOSEFILE down
+  fi
+
+}
+
+#######################################
+# Start the server and all of its
+# components
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+#######################################
+start() {
+
+  if [ $(isRunning) = true ]; then
+    echo >&2 "The component are already running";
+    exit 1;
+  fi
+
+  # start docker containers
+  docker-compose -f $DOCKERCOMPOSEFILE up -d
+
+}
+
+#######################################
+# Restart the server and all of its
+# components
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+#######################################
+restart() {
+  stop
+  start
+}
+
+#######################################
+# Check if the docker-components are running
+# Globals:
+#   DOCKERCOMPOSEFILE
+# Arguments:
+#   None
+# Returns:
+#   true|false
+#######################################
+isRunning() {
+  dockerStatusOutput=$(docker-compose -f $DOCKERCOMPOSEFILE ps -q)
+  outputSize=${#dockerStatusOutput}
+  if [ "$outputSize" -gt 0 ]; then
+    echo true
+  else
+    echo false
+  fi
+}
+
+#######################################
+# Print the usage information for the
+# server control script
+# Globals:
+#   SCRIPTNAME
+# Arguments:
+#   None
+# Returns:
+#   None
+#######################################
+usage() {
+  echo "Utility for controlling dockerized Magento projects\n"
+  echo "Usage:\n\n  $SCRIPTNAME <action> <arguments...>"
+  echo ""
+  echo "Actions:\n"
+  printf "  %-15s%-30s\n" "install" "Install Magento"
+  printf "  %-15s%-30s\n" "exec" "Execute bin/magento inside docker"
+  echo ""
+  printf "  %-15s%-30s\n" "start" "Start the server and all of its components"
+  printf "  %-15s%-30s\n" "restart" "Restart the server"
+  printf "  %-15s%-30s\n" "stop" "Stop the server"
+  printf "  %-15s%-30s\n" "status" "Get the current server status"
+}
+
+case "$1" in
+    install)
+    shift 1
+    installMagento $*
+    ;;
+
+    exec)
+    shift 1
+    executeInDocker $*
+    ;;
+
+    start)
+    start
+    ;;
+
+    restart)
+    restart
+    ;;
+
+    stop)
+    stop
+    ;;
+
+    status)
+    status
+    ;;
+
+    *)
+    usage
+    ;;
+esac
+
+exit 0

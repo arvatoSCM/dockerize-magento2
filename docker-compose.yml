@@ -1,0 +1,68 @@
+version: '2'
+services:
+  web:
+    image: nginx:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./config/nginx/sites-enabled/default.conf:/etc/nginx/sites-enabled/default.conf
+      - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./config/nginx/ssl:/etc/nginx/ssl
+      - ./config/nginx/auth:/etc/nginx/auth
+    volumes_from:
+      - appdata:ro
+    depends_on:
+      - php
+
+
+  php:
+    build: config/php/image
+    volumes:
+      - ./config/php/php.ini:/usr/local/etc/php/php.ini
+      - ./config/php/php-fpm.conf:/usr/local/etc/php-fpm.conf
+      - ./config/php/ext-xdebug.ini:/usr/local/etc/php/conf.d/ext-xdebug.ini
+    volumes_from:
+      - appdata
+    depends_on:
+      - appdata
+      - mysql
+      - cache
+    user: www-data
+
+
+  appdata:
+    image: alpine:latest
+    volumes:
+      - ./config/appdata/startup.sh:/startup.sh
+      - .:/var/www/html
+    command: /bin/sh /startup.sh
+
+
+  mysql:
+    image: mysql:5.6
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DATABASE_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DATABASE_NAME}
+      MYSQL_USER: ${DATABASE_USER}
+      MYSQL_PASSWORD: ${DATABASE_ROOT_PASSWORD}
+    volumes:
+      - magento2mysqldata:/var/lib/mysql
+      - ./config/mysql/custom-entrypoint.sh:/custom-entrypoint.sh
+    entrypoint: /bin/sh /custom-entrypoint.sh
+
+  cache:
+    image: redis:latest
+
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: "mysql"
+      PMA_PORT: 3306
+
+volumes:
+    magento2mysqldata:
+      driver: local
