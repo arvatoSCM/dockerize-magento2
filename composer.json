@@ -1,0 +1,31 @@
+{
+  "name": "arvatoscm/dockerize-magento2",
+  "description": "Docker infrastructure defintions for Magento 2",
+  "license": "Apache-2.0",
+  "authors": [
+      {
+          "name": "Andreas Koch",
+          "email": "andy@ak7.io",
+          "homepage": "https://github.com/andreaskoch",
+          "role": "Author"
+      }
+  ],
+  "type": "magento2-component",
+  "homepage": "https://github.com/arvatoSCM/dockerize-magento2",
+  "extra": {
+    "map": [
+      [
+        "docker-compose.yml",
+        "docker-compose.yml"
+      ],
+      [
+        "config",
+        "config"
+      ],
+      [
+        "bin/console",
+        "bin/console"
+      ]
+    ]
+  }
+}
