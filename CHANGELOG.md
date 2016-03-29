@@ -4,7 +4,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Added
-- Initial version of the Docker Compose control script (bin/console) and required configuration files for Nginx, PHP and MySQL
+-
 
 ### Changed
 -
@@ -20,3 +20,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Security
 -
+
+## v1.0.0
+### Added
+- Initial version of the Docker Compose control script (bin/console) and required configuration files for Nginx, PHP and MySQL
