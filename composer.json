@@ -1,6 +1,6 @@
 {
   "name": "arvatoscm/dockerize-magento2",
-  "description": "Docker infrastructure defintions for Magento 2",
+  "description": "Docker infrastructure definitions for Magento 2",
   "license": "Apache-2.0",
   "authors": [
       {
