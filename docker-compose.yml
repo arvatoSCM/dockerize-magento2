@@ -17,7 +17,7 @@ services:
 
 
   php:
-    build: config/php/image
+    image: php:latest
     volumes:
       - ./config/php/php.ini:/usr/local/etc/php/php.ini
       - ./config/php/php-fpm.conf:/usr/local/etc/php-fpm.conf
@@ -40,7 +40,7 @@ services:
 
 
   mysql:
-    image: mysql:5.6
+    image: mysql:latest
     environment:
       MYSQL_ROOT_PASSWORD: ${DATABASE_ROOT_PASSWORD}
       MYSQL_DATABASE: ${DATABASE_NAME}
