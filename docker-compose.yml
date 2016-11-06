@@ -13,11 +13,11 @@ services:
     volumes_from:
       - appdata:ro
     depends_on:
-      - php
+      - magento2-php
 
 
-  php:
-    build: config/php/image
+  magento2-php:
+    image: arvato/magento2-php:latest
     volumes:
       - ./config/php/php.ini:/usr/local/etc/php/php.ini
       - ./config/php/php-fpm.conf:/usr/local/etc/php-fpm.conf
