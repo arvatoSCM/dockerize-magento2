@@ -14,6 +14,9 @@ services:
       - appdata:ro
     depends_on:
       - php
+    networks:
+      - front
+      - back
 
 
   php:
@@ -24,11 +27,14 @@ services:
       - ./config/php/ext-xdebug.ini:/usr/local/etc/php/conf.d/ext-xdebug.ini
     volumes_from:
       - appdata
+    env_file: .env
     depends_on:
       - appdata
       - mysql
       - cache
     user: www-data
+    networks:
+      - back
 
 
   appdata:
@@ -40,20 +46,23 @@ services:
 
 
   mysql:
-    image: mysql:5.6
+    image: mysql:5.7
+    env_file: .env
     environment:
       MYSQL_ROOT_PASSWORD: ${DATABASE_ROOT_PASSWORD}
       MYSQL_DATABASE: ${DATABASE_NAME}
       MYSQL_USER: ${DATABASE_USER}
-      MYSQL_PASSWORD: ${DATABASE_ROOT_PASSWORD}
+      MYSQL_PASSWORD: ${DATABASE_PASSWORD}
     volumes:
       - magento2mysqldata:/var/lib/mysql
-      - ./config/mysql/custom-entrypoint.sh:/custom-entrypoint.sh
-    entrypoint: /bin/sh /custom-entrypoint.sh
+    networks:
+      - back
+
 
   cache:
     image: redis:latest
-
+    networks:
+      - back
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
@@ -62,7 +71,16 @@ services:
     environment:
       PMA_HOST: "mysql"
       PMA_PORT: 3306
+    networks:
+      - front
+      - back
 
 volumes:
     magento2mysqldata:
       driver: local
+
+networks:
+  front:
+    driver: bridge
+  back:
+    driver: bridge
