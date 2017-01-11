@@ -7,6 +7,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - Replace config/env.sh with a regular Docker Compose .env file
 
+### Added
+- Add support for versioned assets that have made the default with Magento 2.1.3 (see: [magento/magento2 issue #7820](https://github.com/magento/magento2/issues/7820))
+
 ## [v1.1.0]
 
 ### Added
