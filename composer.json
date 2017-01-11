@@ -23,6 +23,10 @@
         "config"
       ],
       [
+        ".env",
+        ".env"
+      ],
+      [
         "bin/console",
         "bin/console"
       ]

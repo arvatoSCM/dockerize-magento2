@@ -22,7 +22,7 @@ SSLCERTIFICATEFOLDER="$CONFIGFOLDER/nginx/ssl"
 # ENVIRONMENTVARIABLESFILE contains the path
 # to the file that holds the required environment
 # variables for this script.
-ENVIRONMENTVARIABLESFILE=".env"
+ENVIRONMENTVARIABLESFILE="./.env"
 if [ ! -f $ENVIRONMENTVARIABLESFILE ]; then
   echo >&2 "The file that holds the environment variables was not found at $ENVIRONMENTVARIABLESFILE"
   exit 1
