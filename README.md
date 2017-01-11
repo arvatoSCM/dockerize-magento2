@@ -86,7 +86,7 @@ DEFAULT_TIMEZONE="Europe/Berlin"
 BACKEND_FRONTNAME="management"
 ```
 
-If you want to use different parameters change the values in the [config/env.sh](config/env.sh) file to your needs.
+If you want to use different parameters change the values in the [.env](.env) file to your needs.
 After customizing the parameters just run trigger the installation with `bin/console install <hostname>`.
 
 ## Licensing
