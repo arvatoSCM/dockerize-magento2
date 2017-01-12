@@ -22,7 +22,7 @@ SSLCERTIFICATEFOLDER="$CONFIGFOLDER/nginx/ssl"
 # ENVIRONMENTVARIABLESFILE contains the path
 # to the file that holds the required environment
 # variables for this script.
-ENVIRONMENTVARIABLESFILE="$CONFIGFOLDER/env.sh"
+ENVIRONMENTVARIABLESFILE="$PROJECTPATH/.env"
 if [ ! -f $ENVIRONMENTVARIABLESFILE ]; then
   echo >&2 "The file that holds the environment variables was not found at $ENVIRONMENTVARIABLESFILE"
   exit 1
@@ -130,11 +130,8 @@ executeInDocker() {
     exit 1;
   fi
 
-  # get the container name of the PHP container
-  phpContainerName=$(docker-compose ps -q | xargs docker inspect --format='{{ .Name }}' | sed 's:^/::g' | grep "php_")
-
   # pass the arguments to the bin/magento script inside the PHP container
-  docker exec -it -u www-data $phpContainerName bash -c "bin/magento $*"
+  docker-compose exec php bash -c "bin/magento $*"
 }
 
 #######################################
