@@ -12,7 +12,7 @@ The composer package **arvatoscm/dockerize-magento2** deploys docker infrastruct
 
 For Linux users you must have a recent version of [docker](https://github.com/docker/docker/releases) and [docker-compose](https://github.com/docker/compose/releases) installed.
 
-If you are a Mac or Windows user, use the [Docker Toolbox](https://www.docker.com/products/docker-toolbox).
+If you have an earlier Windows or Mac system that doesn’t meet the [Docker for Windows](https://docs.docker.com/engine/installation/windows/) or [Docker for Mac](https://docs.docker.com/engine/installation/mac/) requirements, use the [Docker Toolbox](https://www.docker.com/products/docker-toolbox).
 
 ## Installation
 
