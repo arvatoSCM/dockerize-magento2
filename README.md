@@ -68,6 +68,7 @@ For more information on how to use docker-compose visit: https://docs.docker.com
 The `install` action depends on some parameters such as usernames and passwords. We have put in some default values for you that will work for a quick test:
 
 ```
+DATABASE_HOST="mysql"
 DATABASE_NAME="magento2dockerized"
 DATABASE_USER="magento"
 DATABASE_PASSWORD="enAVINa2"

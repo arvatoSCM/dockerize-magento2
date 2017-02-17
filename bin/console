@@ -40,6 +40,11 @@ fi
 . $ENVIRONMENTVARIABLESFILE
 
 # check the environment variables
+if [ -z "$DATABASE_HOST" ]; then
+  echo >&2 "The DATABASE_HOST variable is not set"
+  exit 1
+fi
+
 if [ -z "$DATABASE_NAME" ]; then
   echo >&2 "The DATABASE_NAME variable is not set"
   exit 1
@@ -193,6 +198,7 @@ generateSSLCertificate() {
 #######################################
 # Install Magento
 # Globals:
+#   DATABASE_HOST
 #   DATABASE_NAME
 #   DATABASE_USER
 #   DATABASE_PASSWORD
@@ -246,7 +252,7 @@ installMagento() {
   backendURL="https://${hostname}/${BACKEND_FRONTNAME}"
   executeInDocker setup:install --base-url=$baseURLInsecure --base-url-secure=$baseURLSecure --backend-frontname=${BACKEND_FRONTNAME} \
                             --language=${DEFAULT_LANGUAGE} --currency=${DEFAULT_CURRENCY} --timezone=${DEFAULT_TIMEZONE} \
-                            --db-host=mysql --db-name=${DATABASE_NAME} --db-user=${DATABASE_USER} --db-password=${DATABASE_PASSWORD} \
+                            --db-host=${DATABASE_HOST} --db-name=${DATABASE_NAME} --db-user=${DATABASE_USER} --db-password=${DATABASE_PASSWORD} \
                             --admin-firstname=${ADMIN_FIRSTNAME} --admin-lastname=${ADMIN_LASTNAME} --admin-email=${ADMIN_EMAIL} --admin-user=${ADMIN_USERNAME} --admin-password=${ADMIN_PASSWORD} \
                             --cleanup-database --session-save=db
 
