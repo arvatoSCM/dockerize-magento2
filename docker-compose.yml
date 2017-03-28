@@ -75,6 +75,21 @@ services:
       - front
       - back
 
+  integration:
+    build: Docker/integration-test-container
+    volumes:
+      - ./config/php/php.ini:/usr/local/etc/php/php.ini
+      - ./config/php/php-fpm.conf:/usr/local/etc/php-fpm.conf
+      - ./config/php/ext-xdebug.ini:/usr/local/etc/php/conf.d/ext-xdebug.ini
+    volumes_from:
+      - appdata
+    env_file: .env
+    user: www-data
+    networks:
+      - back
+    depends_on:
+      - mysql
+
 volumes:
     magento2mysqldata:
       driver: local

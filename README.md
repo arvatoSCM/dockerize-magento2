@@ -89,6 +89,25 @@ BACKEND_FRONTNAME="management"
 If you want to use different parameters change the values in the [.env](.env) file to your needs.
 After customizing the parameters just run trigger the installation with `bin/console install <hostname>`.
 
+## Integration Tests
+
+### Setup 
+1. Create database `magento_integration_tests` (easiest way is to open phpmyadmin at [http://dockerized-magento.local:8080/](http://dockerized-magento.local:8080/) and login as root)
+2. Copy `magento/dev/tests/integration/etc/install-config-mysql.php.dist` to `magento/dev/tests/integration/etc/install-config-mysql.php`
+3. Change database parameters in `magento/dev/tests/integration/etc/install-config-mysql.php`:
+
+        'db-host' => 'mysql',
+        'db-user' => 'root',
+        'db-password' => 'enAVINa2',
+        'db-name' => 'magento_integration_tests',
+        'db-prefix' => '',
+
+### Running Tests
+
+After the integration test container is set up as described above, you can run the tests with this command:
+
+    docker-compose run --rm integration
+
 ## Licensing
 
 dockerize-magento2 is licensed under the Apache License, Version 2.0.
