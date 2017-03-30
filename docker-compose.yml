@@ -25,6 +25,7 @@ services:
       - ./config/php/php.ini:/usr/local/etc/php/php.ini
       - ./config/php/php-fpm.conf:/usr/local/etc/php-fpm.conf
       - ./config/php/ext-xdebug.ini:/usr/local/etc/php/conf.d/ext-xdebug.ini
+      - ./config/php/mailhog.ini:/usr/local/etc/php/conf.d/mailhog.ini
     volumes_from:
       - appdata
     env_file: .env
@@ -71,6 +72,14 @@ services:
     environment:
       PMA_HOST: "mysql"
       PMA_PORT: 3306
+    networks:
+      - front
+      - back
+
+    mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "8025:8025"
     networks:
       - front
       - back
