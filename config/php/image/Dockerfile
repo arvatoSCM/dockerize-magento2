@@ -95,3 +95,8 @@ RUN cd /tmp/ && git clone https://github.com/xdebug/xdebug.git \
     && touch /usr/local/etc/php/ext-xdebug.ini \
     && rm -r /tmp/xdebug \
     && apt-get purge -y --auto-remove
+
+# Install Mailhog
+RUN DEBIAN_FRONTEND=noninteractive apt-get -y install golang-go
+RUN mkdir /opt/go && export GOPATH=/opt/go && go get github.com/mailhog/mhsendmail
+RUN touch /usr/local/etc/php/mailhog.ini

@@ -267,6 +267,7 @@ installMagento() {
   printf "%-15s%-30s\n" "Backend" $backendURL
   printf "%-15s%s: %s\n" "" "Username" ${ADMIN_USERNAME}
   printf "%-15s%s: %s\n" "" "Password" ${ADMIN_PASSWORD}
+  printf "%-15s%-30s\n" "Mails" "http://${hostname}:8025/"
 
 }
 
