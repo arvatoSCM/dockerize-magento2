@@ -327,7 +327,7 @@ importMagento() {
   # delete env.php if exists
   rm app/etc/env.php
 
-  if grep -Fxq "magento/product-enterprise-edition" composer.json
+  if [ grep -Fxq "magento/product-enterprise-edition" composer.json ] || [ grep -Fxq "magento/project-enterprise-edition" composer.json ]
   then
     curl -k -o-  https://raw.githubusercontent.com/fsspencer/magento2-env-sample/master/ee/env.php > app/etc/env.php
   else
