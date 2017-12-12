@@ -89,6 +89,18 @@ BACKEND_FRONTNAME="management"
 If you want to use different parameters change the values in the [.env](.env) file to your needs.
 After customizing the parameters just run trigger the installation with `bin/console install <hostname>`.
 
+## Import
+
+The `import` action gives you the ability to set up your existing project. You only need to place you database sql file(s) into `config/mysql/` and provide the following parameters.
+
+```bash
+bin/console import <hostname> [crypt]
+```
+
+This will detect if your Magento project is an Enterprise or Community version and download an env.php template and fill it up automatically.
+
+The `crypt` parameter is optional but we recommend to provide it based on the original env.php file.
+
 ## Licensing
 
 dockerize-magento2 is licensed under the Apache License, Version 2.0.

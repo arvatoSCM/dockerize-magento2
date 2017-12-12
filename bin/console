@@ -271,6 +271,116 @@ installMagento() {
 }
 
 #######################################
+# Import Existing Magento
+# Globals:
+#   DATABASE_NAME
+#   DATABASE_USER
+#   DATABASE_PASSWORD
+#   ADMIN_USERNAME
+#   ADMIN_FIRSTNAME
+#   ADMIN_LASTNAME
+#   ADMIN_EMAIL
+#   ADMIN_PASSWORD
+#   DEFAULT_LANGUAGE
+#   DEFAULT_CURRENCY
+#   DEFAULT_TIMEZONE
+#   BACKEND_FRONTNAME
+# Arguments:
+#   hostname
+#   crypt [optional]
+# Returns:
+#   None
+#######################################
+importMagento() {
+
+  # get the hostname from the arguments
+  hostname=$1
+  if [ -z "$hostname" ]; then
+    echo >&2 "Please specify a hostname for your Magento shop (e.g. \"www.example.com\")\n"
+    echo >&2 "Usage:\n"
+    echo >&2 "  $SCRIPTNAME import www.example.com [6954a1ff91e2bb80bba35ebbaf35bcc9]"
+
+    exit 1
+  fi
+
+  # get the crypt from the arguments
+  crypt=$2
+
+  # generate a SSL certificate
+  generateSSLCertificate $hostname
+  if [ $? -ne 0 ]; then
+    exit 1
+  fi
+
+  # Add write permissions for pub folder
+  chmod -R g+w pub
+
+  # Start docker containers (docker-compose > v1.6 and docker > v1.10 required)
+  restart
+
+  # wait for MySQL to come up
+  sleep 30
+
+  # delete var directory 
+  rm -rf var/*
+
+  # delete env.php if exists
+  rm app/etc/env.php
+
+  if [ grep -Fxq "magento/product-enterprise-edition" composer.json ] || [ grep -Fxq "magento/project-enterprise-edition" composer.json ]
+  then
+    curl -k -o-  https://raw.githubusercontent.com/fsspencer/magento2-env-sample/master/ee/env.php > app/etc/env.php
+  else
+    curl -k -o-  https://raw.githubusercontent.com/fsspencer/magento2-env-sample/master/ce/env.php > app/etc/env.php
+  fi
+
+  # Install magento 2
+  baseURLInsecure="http://${hostname}/"
+  baseURLSecure="https://${hostname}/"
+  backendURL="https://${hostname}/${BACKEND_FRONTNAME}"
+
+  # replace env.php values
+  find "app/etc/env.php" -type f -exec sed -i "" "s/\[BACKEND_FRONTEND\]/${BACKEND_FRONTNAME}/g" {} \;
+  find "app/etc/env.php" -type f -exec sed -i "" "s/\[DB_HOST\]/mysql/g" {} \;
+  find "app/etc/env.php" -type f -exec sed -i "" "s/\[DB_NAME\]/${DATABASE_NAME}/g" {} \;
+  find "app/etc/env.php" -type f -exec sed -i "" "s/\[DB_USER\]/${DATABASE_USER}/g" {} \;
+  find "app/etc/env.php" -type f -exec sed -i "" "s/\[DB_PASSWORD\]/${DATABASE_PASSWORD}/g" {} \;
+
+  if [ ! -z "$crypt" ]; then
+    find "app/etc/env.php" -type f -exec sed -i "" "s/\[CRYPT\]/${crypt}/g" {} \;
+  fi
+
+  DATEINSTALL=$(php -r "echo date('r');")
+  find "app/etc/env.php" -type f -exec sed -i "" "s/\[DATE\]/${DATEINSTALL}/g" {} \;
+
+  # Import Magento database
+  docker-compose exec mysql /bin/bash /docker-entrypoint-initdb.d/import.sh ${DATABASE_ROOT_PASSWORD} ${DATABASE_USER} ${DATABASE_PASSWORD} ${DATABASE_NAME}
+
+  executeInDocker config:set web/unsecure/base_url ${baseURLSecure}
+  executeInDocker config:set web/secure/base_url ${baseURLInsecure}
+  executeInDocker admin:user:create --admin-firstname=${ADMIN_FIRSTNAME} --admin-lastname=${ADMIN_LASTNAME} --admin-email=${ADMIN_EMAIL} --admin-user=${ADMIN_USERNAME} --admin-password=${ADMIN_PASSWORD}
+
+  # Install and update modules
+  executeInDocker setup:upgrade
+
+  # Clear cache
+  executeInDocker cache:clean
+
+  # Index data
+  executeInDocker indexer:reindex
+
+  # Print results
+  echo "\n"
+  echo "Import complete.\n"
+
+  printf "%-15s%-30s\n" "Frontend" $baseURLInsecure
+  printf "%-15s%-30s\n" "Backend" $backendURL
+  printf "%-15s%s: %s\n" "" "Username" ${ADMIN_USERNAME}
+  printf "%-15s%s: %s\n" "" "Password" ${ADMIN_PASSWORD}
+
+}
+
+#######################################
 # Print the status of the server
 # Globals:
 #   None
@@ -380,6 +490,7 @@ usage() {
   echo ""
   echo "Actions:\n"
   printf "  %-15s%-30s\n" "install" "Install Magento"
+  printf "  %-15s%-30s\n" "import" "Import existing Magento"
   printf "  %-15s%-30s\n" "exec" "Execute bin/magento inside docker"
   echo ""
   printf "  %-15s%-30s\n" "start" "Start the server and all of its components"
@@ -392,6 +503,11 @@ case "$1" in
     install)
     shift 1
     installMagento $*
+    ;;
+
+    import)
+    shift 1
+    importMagento $*
     ;;
 
     exec)
