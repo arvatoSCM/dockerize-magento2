@@ -14,12 +14,24 @@ For Linux users you must have a recent version of [docker](https://github.com/do
 
 If you are a Mac or Windows user, use the [Docker Toolbox](https://www.docker.com/products/docker-toolbox).
 
-## Installation
-
-Add `arvatoscm/dockerize-magento2` to your existing Magento 2 shop:
+## PreInstallation
 
 ```bash
-composer require --ignore-platform-reqs arvatoscm/dockerize-magento2
+ composer create-project --ignore-platform-reqs --repository-url=https://repo.magento.com/ magento/project-community-edition magento2
+```
+
+```bash
+ composer create-project --ignore-platform-reqs --repository-url=https://repo.magento.com/ magento/project-community-edition=2.2.0 magento2
+```
+
+## Installation
+
+Add `swissup/dockerize-magento2` to your existing Magento 2 shop:
+
+```bash
+composer config repositories.swissup composer https://swissup.github.io/packages/
+composer require --ignore-platform-reqs swissup/dockerize-magento2
+composer require --ignore-platform-reqs swissup/dockerize-magento2:dev-master --prefer-source
 chmod +x bin/console
 ```
 
