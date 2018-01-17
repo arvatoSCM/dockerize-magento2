@@ -68,22 +68,23 @@ For more information on how to use docker-compose visit: https://docs.docker.com
 The `install` action depends on some parameters such as usernames and passwords. We have put in some default values for you that will work for a quick test:
 
 ```
-DATABASE_NAME="magento2dockerized"
-DATABASE_USER="magento"
-DATABASE_PASSWORD="enAVINa2"
-DATABASE_ROOT_PASSWORD="enAVINa2"
+DATABASE_NAME=magento2
+DATABASE_USER=magento2
+DATABASE_PASSWORD=pw
+DATABASE_ROOT_PASSWORD=pw
 
-ADMIN_USERNAME="admin"
-ADMIN_FIRSTNAME="Admin"
-ADMIN_LASTNAME="Inistrator"
-ADMIN_EMAIL="johndoe@example.com"
-ADMIN_PASSWORD="enAVINa2"
+ADMIN_USERNAME=admin
+ADMIN_FIRSTNAME=John
+ADMIN_LASTNAME=Doe
+ADMIN_EMAIL=johndoe@example.com
+ADMIN_PASSWORD=123654a
 
-DEFAULT_LANGUAGE="en_US"
-DEFAULT_CURRENCY="EUR"
-DEFAULT_TIMEZONE="Europe/Berlin"
+DEFAULT_LANGUAGE=en_US
+DEFAULT_CURRENCY=EUR
+DEFAULT_TIMEZONE=Europe/Kyev
 
-BACKEND_FRONTNAME="management"
+BACKEND_FRONTNAME=backend
+
 ```
 
 If you want to use different parameters change the values in the [.env](.env) file to your needs.
