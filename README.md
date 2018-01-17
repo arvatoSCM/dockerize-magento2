@@ -55,10 +55,23 @@ Stop the docker containers:
 bin/console stop
 ```
 
-Execute `bin/magento` inside the docker container:
+Execute Magento CLI `bin/magento` inside the docker container:
 
 ```bash
 bin/console exec [arguments]
+```
+
+Run command inside the docker container:
+
+```bash
+bin/console run [command]
+```
+
+
+Enter inside the docker container:
+
+```bash
+bin/console enter [php|web|phpmyadmin]
 ```
 
 For more information on how to use docker-compose visit: https://docs.docker.com/compose/

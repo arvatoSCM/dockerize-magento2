@@ -123,7 +123,7 @@ hash docker-compose 2>/dev/null || { echo >&2 "$SCRIPTNAME requires \"docker-com
 # Returns:
 #   None
 #######################################
-executeInDocker() {
+executeMagentoCliInDocker() {
 
   if [ $(isRunning) = false ]; then
     echo >&2 "Docker is not running. Please start the containers first.";
@@ -132,6 +132,48 @@ executeInDocker() {
 
   # pass the arguments to the bin/magento script inside the PHP container
   docker-compose exec php bash -c "bin/magento $*"
+}
+
+#######################################
+# Execute command inside the php docker
+# container with all given arguments.
+# Globals:
+#   None
+# Arguments:
+#   *
+# Returns:
+#   None
+#######################################
+executeInDocker() {
+
+  if [ $(isRunning) = false ]; then
+    echo >&2 "Docker is not running. Please start the containers first.";
+    exit 1;
+  fi
+
+  # pass the arguments to the bash script inside the PHP container
+  docker-compose exec php bash -c "$*"
+}
+
+#######################################
+# Enter to the container
+# Globals:
+#   None
+# Arguments:
+#   container (web, php, cache, phpmyadmin, mysql, appdata)
+# Returns:
+#   None
+#######################################
+enterInDocker() {
+
+  if [ $(isRunning) = false ]; then
+    echo >&2 "Docker is not running. Please start the containers first.";
+    exit 1;
+  fi
+
+  container=$1
+
+  docker exec -ti "dockerizedmagento2_"$container"_1" bash
 }
 
 #######################################
@@ -244,20 +286,20 @@ installMagento() {
   baseURLInsecure="http://${hostname}/"
   baseURLSecure="https://${hostname}/"
   backendURL="https://${hostname}/${BACKEND_FRONTNAME}"
-  executeInDocker setup:install --base-url=$baseURLInsecure --base-url-secure=$baseURLSecure --backend-frontname=${BACKEND_FRONTNAME} \
+  executeMagentoCliInDocker setup:install --base-url=$baseURLInsecure --base-url-secure=$baseURLSecure --backend-frontname=${BACKEND_FRONTNAME} \
                             --language=${DEFAULT_LANGUAGE} --currency=${DEFAULT_CURRENCY} --timezone=${DEFAULT_TIMEZONE} \
                             --db-host=mysql --db-name=${DATABASE_NAME} --db-user=${DATABASE_USER} --db-password=${DATABASE_PASSWORD} \
                             --admin-firstname=${ADMIN_FIRSTNAME} --admin-lastname=${ADMIN_LASTNAME} --admin-email=${ADMIN_EMAIL} --admin-user=${ADMIN_USERNAME} --admin-password=${ADMIN_PASSWORD} \
                             --cleanup-database --session-save=db
 
   # Install and update modules
-  executeInDocker setup:upgrade
+  executeMagentoCliInDocker setup:upgrade
 
   # Clear cache
-  executeInDocker cache:clean
+  executeMagentoCliInDocker cache:clean
 
   # Index data
-  executeInDocker indexer:reindex
+  executeMagentoCliInDocker indexer:reindex
 
   # Print results
   echo "\n"
@@ -381,6 +423,8 @@ usage() {
   echo "Actions:\n"
   printf "  %-15s%-30s\n" "install" "Install Magento"
   printf "  %-15s%-30s\n" "exec" "Execute bin/magento inside docker"
+  printf "  %-15s%-30s\n" "run" "Run command inside docker"
+  printf "  %-15s%-30s\n" "enter" "Enter inside docker container"
   echo ""
   printf "  %-15s%-30s\n" "start" "Start the server and all of its components"
   printf "  %-15s%-30s\n" "restart" "Restart the server"
@@ -396,7 +440,17 @@ case "$1" in
 
     exec)
     shift 1
+    executeMagentoCliInDocker $*
+    ;;
+
+    run)
+    shift 1
     executeInDocker $*
+    ;;
+
+    enter)
+    shift 1
+    enterInDocker $*
     ;;
 
     start)
