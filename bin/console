@@ -284,8 +284,6 @@ installMagento() {
 
   curl --silent --show-error https://getcomposer.org/installer | php
 
-  php composer.phar update
-
   # Install magento 2
   baseURLInsecure="http://${hostname}/"
   baseURLSecure="https://${hostname}/"
