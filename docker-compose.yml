@@ -11,7 +11,7 @@ services:
       - ./config/nginx/ssl:/etc/nginx/ssl
       - ./config/nginx/auth:/etc/nginx/auth
     volumes_from:
-      - appdata:ro
+      - appdata
     depends_on:
       - php
     networks:
