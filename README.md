@@ -34,11 +34,13 @@ Add to composer.json
 ```
   bin/console install <hostname>
   bin/console run curl --silent --show-error https://getcomposer.org/installer | php
-  bin/console run php composer.phar update -vv
-  bin/console run php composer.phar update -vv
+  bin/console run php composer.phar update 
   bin/console exec sampledata:deploy
   bin/console exec setup:upgrade
   bin/console exec setup:di:compile
+  
+  docker exec -u 0 -ti "dockerizemagento2_php_1" bash
+  #bin/magento --version
 ```
 
 ## Installation
