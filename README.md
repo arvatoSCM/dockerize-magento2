@@ -17,11 +17,28 @@ If you are a Mac or Windows user, use the [Docker Toolbox](https://www.docker.co
 ## PreInstallation
 
 ```bash
- composer create-project --ignore-platform-reqs --repository-url=https://repo.magento.com/ magento/project-community-edition magento2
+ composer create-project --ignore-platform-reqs --repository-url=https://repo.magento.com/ magento/project-community-edition dockerize-magento2
 ```
 
 ```bash
  composer create-project --ignore-platform-reqs --repository-url=https://repo.magento.com/ magento/project-community-edition=2.2.0 magento2
+```
+
+Add to composer.json
+```
+"config": {
+    "secure-http": false
+}
+```
+
+```
+  bin/console install <hostname>
+  bin/console run curl --silent --show-error https://getcomposer.org/installer | php
+  bin/console run php composer.phar update -vv
+  bin/console run php composer.phar update -vv
+  bin/console exec sampledata:deploy
+  bin/console exec setup:upgrade
+  bin/console exec setup:di:compile
 ```
 
 ## Installation
