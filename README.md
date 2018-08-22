@@ -6,7 +6,7 @@ The composer package **arvatoscm/dockerize-magento2** deploys docker infrastruct
 
 ## Package Name
 
-`arvatoscm/dockerize-magento2`
+`swissup/dockerize-magento2`
 
 ## Software Requirements
 
