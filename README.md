@@ -24,25 +24,6 @@ If you are a Mac or Windows user, use the [Docker Toolbox](https://www.docker.co
  composer create-project --ignore-platform-reqs --repository-url=https://repo.magento.com/ magento/project-community-edition=2.2.0 magento2
 ```
 
-Add to composer.json
-```
-"config": {
-    "secure-http": false
-}
-```
-
-```
-  bin/console install <hostname>
-  bin/console run curl --silent --show-error https://getcomposer.org/installer | php
-  bin/console run php composer.phar update 
-  bin/console exec sampledata:deploy
-  bin/console exec setup:upgrade
-  bin/console exec setup:di:compile
-  
-  docker exec -u 0 -ti "dockerizemagento2_php_1" bash
-  #bin/magento --version
-```
-
 ## Installation
 
 Add `swissup/dockerize-magento2` to your existing Magento 2 shop:
@@ -63,6 +44,24 @@ A utility script for controlling dockerized Magento projects
 - `config`
 A folder which contains the configuration files for PHP, Nginx and phpMyAdmin
 
+Add to composer.json
+```
+"config": {
+    "secure-http": false
+}
+```
+
+```
+  bin/console install <hostname>
+  bin/console run curl --silent --show-error https://getcomposer.org/installer | php
+  bin/console run php composer.phar update 
+  bin/console bin/magento sampledata:deploy
+  bin/console bin/magento setup:upgrade
+  bin/console bin/magento setup:di:compile
+  
+  docker exec -u 0 -ti "dockerizemagento2_php_1" bash
+  #bin/magento --version
+```
 
 ## Usage
 
