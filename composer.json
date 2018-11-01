@@ -29,6 +29,10 @@
       [
         "bin/console",
         "bin/console"
+      ],
+      [
+        "bin/console",
+        "vendor/bin/dockerizer"
       ]
     ]
   }
