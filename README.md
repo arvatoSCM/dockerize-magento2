@@ -39,6 +39,20 @@ composer require --ignore-platform-reqs swissup/dockerize-magento2:dev-develop -
 chmod +x bin/console
 ```
 
+### PHP 7.1
+
+```
+docker build ./vendor/swissup/dockerize-magento2/config/php/7.1/ -t swissup/magento2-php:7.1
+```
+
+In [magento root]/docker-compose.yml replace
+
+```diff
+php:
+    -image: arvato/magento2-php:latest
+    +image: swissup/magento2-php:7.1
+```
+
 This will place some files in your Magento root:
 
 - `docker-compose.yml`
@@ -58,11 +72,11 @@ Add to composer.json
 ```
   bin/console install <hostname>
   bin/console run curl --silent --show-error https://getcomposer.org/installer | php
-  bin/console run php composer.phar update 
+  bin/console run php composer.phar update
   bin/console bin/magento sampledata:deploy
   bin/console bin/magento setup:upgrade
   bin/console bin/magento setup:di:compile
-  
+
   docker exec -u 0 -ti "dockerizemagento2_php_1" bash
   #bin/magento --version
 ```
