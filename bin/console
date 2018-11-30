@@ -368,7 +368,8 @@ start() {
   fi
 
   # start docker containers
-  docker-compose -f $DOCKERCOMPOSEFILE up -d && docker-compose logs -f
+  # docker-compose -f $DOCKERCOMPOSEFILE up -d && docker-compose logs -f
+  docker-compose -f $DOCKERCOMPOSEFILE up -d
 
 }
 
