@@ -29,9 +29,13 @@ If you are a Mac or Windows user, use the [Docker Toolbox](https://www.docker.co
 Add `swissup/dockerize-magento2` to your existing Magento 2 shop:
 
 ```bash
-composer config repositories.swissup composer http://docs.swissuplabs.com/packages/
+composer config repositories.swissup composer https://docs.swissuplabs.com/packages/
+
 composer require --ignore-platform-reqs swissup/dockerize-magento2
+
+composer config minimum-stability dev
 composer require --ignore-platform-reqs swissup/dockerize-magento2:dev-develop --prefer-source
+
 chmod +x bin/console
 ```
 
