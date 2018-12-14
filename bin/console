@@ -374,6 +374,27 @@ start() {
 }
 
 #######################################
+# Show the server logs and all of its
+# components
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+#######################################
+log() {
+
+  if [ $(isRunning) = false ]; then
+    echo >&2 "The components are not running";
+    exit 1;
+  fi
+
+  # start docker containers
+  docker-compose logs -f
+}
+
+#######################################
 # Restart the server and all of its
 # components
 # Globals:
