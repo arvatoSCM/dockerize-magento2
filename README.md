@@ -94,6 +94,11 @@ vendor/bin/dockerizer install <hostname>
 vendor/bin/dockerizer install magento.local
 ```
 
+Add line to /etc/hosts
+```txt
+127.0.0.1 magento.local
+```
+
 Start the docker containers:
 
 ```bash
