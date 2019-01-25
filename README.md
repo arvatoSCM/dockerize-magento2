@@ -37,6 +37,7 @@ composer config minimum-stability dev
 composer require --ignore-platform-reqs swissup/dockerize-magento2:dev-develop --prefer-source
 
 chmod +x bin/console
+chmod +x vendor/bin/dockerizer
 ```
 
 ### PHP 7.1
@@ -57,7 +58,7 @@ This will place some files in your Magento root:
 
 - `docker-compose.yml`
 The docker infrastructure definition
-- `bin/console`
+- `vendor/bin/dockerizer`
 A utility script for controlling dockerized Magento projects
 - `config`
 A folder which contains the configuration files for PHP, Nginx and phpMyAdmin
@@ -70,12 +71,12 @@ Add to composer.json
 ```
 
 ```
-  bin/console install <hostname>
-  bin/console run curl --silent --show-error https://getcomposer.org/installer | php
-  bin/console run php composer.phar update
-  bin/console bin/magento sampledata:deploy
-  bin/console bin/magento setup:upgrade
-  bin/console bin/magento setup:di:compile
+  vendor/bin/dockerizer install <hostname>
+  vendor/bin/dockerizer bash curl --silent --show-error https://getcomposer.org/installer | php
+  vendor/bin/dockerizer bash php composer.phar update
+  vendor/bin/dockerizer bin/magento sampledata:deploy
+  vendor/bin/dockerizer bin/magento setup:upgrade
+  vendor/bin/dockerizer bin/magento setup:di:compile
 
   docker exec -u 0 -ti "dockerizemagento2_php_1" bash
   #bin/magento --version
@@ -83,43 +84,44 @@ Add to composer.json
 
 ## Usage
 
-`dockerize-magento2` comes with `bin/console` script that can be used to install Magento and to execute Magentos' bin/magento script inside the PHP docker container:
+`dockerize-magento2` comes with `vendor/bin/dockerizer` script that can be used to install Magento and to execute Magentos' bin/magento script inside the PHP docker container:
 
 Trigger the Magento 2 installation process:
 
 ```bash
-bin/console install <hostname>
+vendor/bin/dockerizer install <hostname>
+vendor/bin/dockerizer install magento.local
 ```
 
 Start the docker containers:
 
 ```bash
-bin/console start
+vendor/bin/dockerizer start
 ```
 
 Stop the docker containers:
 
 ```bash
-bin/console stop
+vendor/bin/dockerizer stop
 ```
 
 Execute Magento CLI `bin/magento` inside the docker container:
 
 ```bash
-bin/console exec [arguments]
+vendor/bin/dockerizer bin/magento [arguments]
 ```
 
 Run command inside the docker container:
 
 ```bash
-bin/console run [command]
+vendor/bin/dockerizer bash [command]
 ```
 
 
 Enter inside the docker container:
 
 ```bash
-bin/console enter [php|web|phpmyadmin]
+vendor/bin/dockerizer enter [php|web|phpmyadmin]
 ```
 
 For more information on how to use docker-compose visit: https://docs.docker.com/compose/
@@ -149,7 +151,7 @@ BACKEND_FRONTNAME=management
 ```
 
 If you want to use different parameters change the values in the [.env](.env) file to your needs.
-After customizing the parameters just run trigger the installation with `bin/console install <hostname>`.
+After customizing the parameters just run trigger the installation with `vendor/bin/dockerizer install <hostname>`.
 
 ## Licensing
 
