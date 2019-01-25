@@ -1,4 +1,4 @@
-FROM php:7.0-fpm
+FROM php:7.1-fpm
 
 ENV PHP_EXTRA_CONFIGURE_ARGS --enable-fpm --with-fpm-user=www-data --with-fpm-group=www-data --enable-intl --enable-opcache --enable-zip
 
@@ -25,7 +25,7 @@ RUN \
   autoconf \
   libbz2-dev \
   libltdl-dev \
-  libpng12-dev \
+  libpng-dev \
   libjpeg62-turbo-dev \
   libfreetype6-dev \
   libxpm-dev \
@@ -36,7 +36,6 @@ RUN \
 
   re2c \
   libpng++-dev \
-  libpng3 \
   libvpx-dev \
   zlib1g-dev \
   libgd-dev \
@@ -51,7 +50,7 @@ RUN \
   wget \
   librabbitmq-dev \
   libzip-dev \
-  libzip2
+  zip
 
 # http://devdocs.magento.com/guides/v2.0/install-gde/system-requirements.html
 RUN \
@@ -96,6 +95,6 @@ RUN cd /tmp/ && git clone https://github.com/xdebug/xdebug.git \
     && rm -r /tmp/xdebug \
     && apt-get purge -y --auto-remove
 
-RUN apk update && apk add curl && \
+RUN apt-get update && apt-get install curl && \
   curl -sS https://getcomposer.org/installer | php \
   && chmod +x composer.phar && mv composer.phar /usr/local/bin/composer

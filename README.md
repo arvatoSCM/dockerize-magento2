@@ -6,7 +6,7 @@ The composer package **arvatoscm/dockerize-magento2** deploys docker infrastruct
 
 ## Package Name
 
-`arvatoscm/dockerize-magento2`
+`swissup/dockerize-magento2`
 
 ## Software Requirements
 
@@ -17,7 +17,7 @@ If you are a Mac or Windows user, use the [Docker Toolbox](https://www.docker.co
 ## PreInstallation
 
 ```bash
- composer create-project --ignore-platform-reqs --repository-url=https://repo.magento.com/ magento/project-community-edition magento2
+ composer create-project --ignore-platform-reqs --repository-url=https://repo.magento.com/ magento/project-community-edition dockerize-magento2
 ```
 
 ```bash
@@ -29,61 +29,100 @@ If you are a Mac or Windows user, use the [Docker Toolbox](https://www.docker.co
 Add `swissup/dockerize-magento2` to your existing Magento 2 shop:
 
 ```bash
-composer config repositories.swissup composer https://swissup.github.io/packages/
-composer require --ignore-platform-reqs swissup/dockerize-magento2
-composer require --ignore-platform-reqs swissup/dockerize-magento2:dev-master --prefer-source
+composer config repositories.swissup composer https://docs.swissuplabs.com/packages/
+
+composer require swissup/dockerize-magento2 --ignore-platform-reqs
+
+composer config minimum-stability dev
+composer require swissup/dockerize-magento2:dev-develop --prefer-source --ignore-platform-reqs
+composer config minimum-stability stable
+
 chmod +x bin/console
+chmod +x vendor/bin/dockerizer
+```
+
+### PHP 7.1 Support
+
+```
+docker build ./vendor/swissup/dockerize-magento2/config/php/7.1/ -t swissup/magento2-php:7.1
+```
+
+In [magento root]/docker-compose.yml replace if you need php 7.1
+
+```diff
+php:
+    -image: arvato/magento2-php:latest
+    +image: swissup/magento2-php:7.1
 ```
 
 This will place some files in your Magento root:
 
 - `docker-compose.yml`
 The docker infrastructure definition
-- `bin/console`
+- `vendor/bin/dockerizer`
 A utility script for controlling dockerized Magento projects
 - `config`
 A folder which contains the configuration files for PHP, Nginx and phpMyAdmin
 
+Add to composer.json
+```
+"config": {
+    "secure-http": false
+}
+```
+
+```
+  vendor/bin/dockerizer install <hostname>
+  vendor/bin/dockerizer bash curl --silent --show-error https://getcomposer.org/installer | php
+  vendor/bin/dockerizer bash php composer.phar update
+  vendor/bin/dockerizer bin/magento sampledata:deploy
+  vendor/bin/dockerizer bin/magento setup:upgrade
+  vendor/bin/dockerizer bin/magento setup:di:compile
+
+  docker exec -u 0 -ti "dockerizemagento2_php_1" bash
+  #bin/magento --version
+```
 
 ## Usage
 
-`dockerize-magento2` comes with `bin/console` script that can be used to install Magento and to execute Magentos' bin/magento script inside the PHP docker container:
+`dockerize-magento2` comes with `vendor/bin/dockerizer` script that can be used to install Magento and to execute Magentos' bin/magento script inside the PHP docker container:
 
 Trigger the Magento 2 installation process:
 
 ```bash
-bin/console install <hostname>
+vendor/bin/dockerizer install <hostname>
+vendor/bin/dockerizer install magento.local
 ```
 
 Start the docker containers:
 
 ```bash
-bin/console start
+vendor/bin/dockerizer start
 ```
 
 Stop the docker containers:
 
 ```bash
-bin/console stop
+vendor/bin/dockerizer stop
 ```
 
 Execute Magento CLI `bin/magento` inside the docker container:
 
 ```bash
-bin/console exec [arguments]
+vendor/bin/dockerizer bin/magento [arguments]
 ```
 
 Run command inside the docker container:
 
 ```bash
-bin/console run [command]
+vendor/bin/dockerizer bash [command]
 ```
 
 
 Enter inside the docker container:
 
 ```bash
-bin/console enter [php|web|phpmyadmin]
+vendor/bin/dockerizer enter [php|web|phpmyadmin]
 ```
 
 For more information on how to use docker-compose visit: https://docs.docker.com/compose/
@@ -93,10 +132,10 @@ For more information on how to use docker-compose visit: https://docs.docker.com
 The `install` action depends on some parameters such as usernames and passwords. We have put in some default values for you that will work for a quick test:
 
 ```
-DATABASE_NAME=magento2
-DATABASE_USER=magento2
-DATABASE_PASSWORD=pw
-DATABASE_ROOT_PASSWORD=pw
+DATABASE_NAME=magento2dockerized
+DATABASE_USER=magento
+DATABASE_PASSWORD=enAVINa2
+DATABASE_ROOT_PASSWORD=enAVINa2
 
 ADMIN_USERNAME=admin
 ADMIN_FIRSTNAME=John
@@ -106,14 +145,14 @@ ADMIN_PASSWORD=123654a
 
 DEFAULT_LANGUAGE=en_US
 DEFAULT_CURRENCY=EUR
-DEFAULT_TIMEZONE=Europe/Kyev
+DEFAULT_TIMEZONE=Europe/Kiev
 
-BACKEND_FRONTNAME=backend
+BACKEND_FRONTNAME=management
 
 ```
 
 If you want to use different parameters change the values in the [.env](.env) file to your needs.
-After customizing the parameters just run trigger the installation with `bin/console install <hostname>`.
+After customizing the parameters just run trigger the installation with `vendor/bin/dockerizer install <hostname>`.
 
 ## Licensing
 

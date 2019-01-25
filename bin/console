@@ -131,7 +131,7 @@ executeMagentoCliInDocker() {
   fi
 
   # pass the arguments to the bin/magento script inside the PHP container
-  docker-compose exec php bash -c "bin/magento $*"
+  docker-compose exec php bash -c "php -d memory_limit=-1 bin/magento $*"
 }
 
 #######################################
@@ -368,8 +368,30 @@ start() {
   fi
 
   # start docker containers
+  # docker-compose -f $DOCKERCOMPOSEFILE up -d && docker-compose logs -f
   docker-compose -f $DOCKERCOMPOSEFILE up -d
 
+}
+
+#######################################
+# Show the server logs and all of its
+# components
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+#######################################
+log() {
+
+  if [ $(isRunning) = false ]; then
+    echo >&2 "The components are not running";
+    exit 1;
+  fi
+
+  # start docker containers
+  docker-compose logs -f
 }
 
 #######################################
@@ -422,8 +444,8 @@ usage() {
   echo ""
   echo "Actions:\n"
   printf "  %-15s%-30s\n" "install" "Install Magento"
-  printf "  %-15s%-30s\n" "exec" "Execute bin/magento inside docker"
-  printf "  %-15s%-30s\n" "run" "Run command inside docker"
+  printf "  %-15s%-30s\n" "bin/magento" "Execute bin/magento inside docker"
+  printf "  %-15s%-30s\n" "bash" "Run command inside docker"
   printf "  %-15s%-30s\n" "enter" "Enter inside docker container"
   echo ""
   printf "  %-15s%-30s\n" "start" "Start the server and all of its components"
@@ -438,9 +460,19 @@ case "$1" in
     installMagento $*
     ;;
 
+    bin/magento)
+    shift 1
+    executeMagentoCliInDocker $*
+    ;;
+
     exec)
     shift 1
     executeMagentoCliInDocker $*
+    ;;
+
+    bash)
+    shift 1
+    executeInDocker $*
     ;;
 
     run)
