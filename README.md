@@ -31,22 +31,23 @@ Add `swissup/dockerize-magento2` to your existing Magento 2 shop:
 ```bash
 composer config repositories.swissup composer https://docs.swissuplabs.com/packages/
 
-composer require --ignore-platform-reqs swissup/dockerize-magento2
+composer require swissup/dockerize-magento2 --ignore-platform-reqs
 
 composer config minimum-stability dev
-composer require --ignore-platform-reqs swissup/dockerize-magento2:dev-develop --prefer-source
+composer require swissup/dockerize-magento2:dev-develop --prefer-source --ignore-platform-reqs
+composer config minimum-stability stable
 
 chmod +x bin/console
 chmod +x vendor/bin/dockerizer
 ```
 
-### PHP 7.1
+### PHP 7.1 Support
 
 ```
 docker build ./vendor/swissup/dockerize-magento2/config/php/7.1/ -t swissup/magento2-php:7.1
 ```
 
-In [magento root]/docker-compose.yml replace
+In [magento root]/docker-compose.yml replace if you need php 7.1
 
 ```diff
 php:
