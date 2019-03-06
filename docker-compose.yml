@@ -75,6 +75,20 @@ services:
       - front
       - back
 
+
+  blackfire:
+    image: blackfire/blackfire
+    environment:
+        # Exposes the host BLACKFIRE_SERVER_ID and TOKEN environment variables.
+        - BLACKFIRE_SERVER_ID
+        - BLACKFIRE_SERVER_TOKEN
+        # You can also use global environment credentials :
+        # BLACKFIRE_SERVER_ID: SERVER-ID
+        # BLACKFIRE_SERVER_TOKEN: SERVER-TOKEN
+    networks:
+      - front
+      - back
+
 volumes:
     magento2mysqldata:
       driver: local
