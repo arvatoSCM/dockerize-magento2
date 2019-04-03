@@ -172,8 +172,11 @@ enterInDocker() {
   fi
 
   container=$1
+  container="_"$container"_1"
+  container=$(docker ps | grep _php_1 | awk '{print $NF}')
 
-  docker exec -ti "dockerizedmagento2_"$container"_1" bash
+  # docker exec -ti $container bash
+  docker exec -u 0 -ti $container bash
 }
 
 #######################################
