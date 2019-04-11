@@ -41,61 +41,6 @@ chmod +x bin/console
 chmod +x vendor/bin/dockerizer
 ```
 
-### PHP 7.1 Support
-
-```
-docker build ./vendor/swissup/dockerize-magento2/config/php/7.1/ -t swissup/magento2-php:7.1
-```
-
-In [magento root]/docker-compose.yml replace if you need php 7.1
-
-```diff
-php:
-    -image: arvato/magento2-php:latest
-    +image: swissup/magento2-php:7.1
-```
-
-This will place some files in your Magento root:
-
-- `docker-compose.yml`
-The docker infrastructure definition
-- `vendor/bin/dockerizer`
-A utility script for controlling dockerized Magento projects
-- `config`
-A folder which contains the configuration files for PHP, Nginx and phpMyAdmin
-
-Add to composer.json
-```
-"config": {
-    "secure-http": false
-}
-```
-
-```
-  vendor/bin/dockerizer install <hostname>
-  vendor/bin/dockerizer bash curl --silent --show-error https://getcomposer.org/installer | php
-  vendor/bin/dockerizer bash php composer.phar update
-  vendor/bin/dockerizer bin/magento sampledata:deploy
-  vendor/bin/dockerizer bin/magento setup:upgrade
-  vendor/bin/dockerizer bin/magento setup:di:compile
-
-  docker exec -u 0 -ti "dockerizemagento2_php_1" bash
-  #bin/magento --version
-```
-
-
-### Elasticsearch Support
-
-Added support for Elasticsearch 5.x. Go to Admin > Stores > Configuration > Catalog > Catalog > Catalog Search, and select "Elasticsarch 5.0+" from the list of options. Keep all defaults the same, but set Elasticsearch Server Hostname to elasticsearch. Auth set Yes. Default username 'elastic' and pass 'changeme'. Save, clear the cache, and run bin/magento indexer:reindex to enable.
-
-```
-vendor/bin/dockerizer enter php
-#curl -u elastic  http://elasti:9200/_cat/health
-Enter host password for user 'elastic': [changeme]
-1554965499 06:51:39 elasticsearch green 1 1 0 0 0 0 0 0 - 100.0%
-exit
-vendor/bin/dockerizer bin/magento indexer:reindex
-```
 ## Usage
 
 `dockerize-magento2` comes with `vendor/bin/dockerizer` script that can be used to install Magento and to execute Magentos' bin/magento script inside the PHP docker container:
@@ -105,11 +50,6 @@ Trigger the Magento 2 installation process:
 ```bash
 vendor/bin/dockerizer install <hostname>
 vendor/bin/dockerizer install magento.local
-```
-
-Add line to /etc/hosts
-```txt
-127.0.0.1 magento.local
 ```
 
 Start the docker containers:
@@ -171,6 +111,74 @@ BACKEND_FRONTNAME=management
 
 If you want to use different parameters change the values in the [.env](.env) file to your needs.
 After customizing the parameters just run trigger the installation with `vendor/bin/dockerizer install <hostname>`.
+
+
+## Troubleshooting
+
+### Add line to /etc/hosts
+
+```txt
+127.0.0.1 magento.local
+```
+
+### PHP 7.1 Support
+
+```
+docker build ./vendor/swissup/dockerize-magento2/config/php/7.1/ -t swissup/magento2-php:7.1
+```
+
+In [magento root]/docker-compose.yml replace if you need php 7.1
+
+```diff
+php:
+    -image: arvato/magento2-php:latest
+    +image: swissup/magento2-php:7.1
+```
+
+This will place some files in your Magento root:
+
+- `docker-compose.yml`
+The docker infrastructure definition
+- `vendor/bin/dockerizer`
+A utility script for controlling dockerized Magento projects
+- `config`
+A folder which contains the configuration files for PHP, Nginx and phpMyAdmin
+
+Add to composer.json
+
+```
+"config": {
+    "secure-http": false
+}
+```
+
+```
+  vendor/bin/dockerizer install <hostname>
+  vendor/bin/dockerizer bash curl --silent --show-error https://getcomposer.org/installer | php
+  vendor/bin/dockerizer bash php composer.phar update
+  vendor/bin/dockerizer bin/magento sampledata:deploy
+  vendor/bin/dockerizer bin/magento setup:upgrade
+  vendor/bin/dockerizer bin/magento setup:di:compile
+
+  docker exec -u 0 -ti "dockerizemagento2_php_1" bash
+  #bin/magento --version
+```
+
+
+### Elasticsearch Support
+
+Added support for Elasticsearch 5.x. Go to Admin > Stores > Configuration > Catalog > Catalog > Catalog Search, and select "Elasticsarch 5.0+" from the list of options. Keep all defaults the same, but set Elasticsearch Server Hostname to elasticsearch. Auth set Yes. Default username 'elastic' and pass 'changeme'. Save, clear the cache, and run bin/magento indexer:reindex to enable.
+
+https://devdocs.magento.com/guides/v2.3/config-guide/elasticsearch/configure-magento.html
+
+```
+vendor/bin/dockerizer enter php
+#curl -u elastic  http://elasti:9200/_cat/health
+Enter host password for user 'elastic': [changeme]
+1554965499 06:51:39 elasticsearch green 1 1 0 0 0 0 0 0 - 100.0%
+exit
+vendor/bin/dockerizer bin/magento indexer:reindex
+```
 
 ## Licensing
 
