@@ -304,6 +304,10 @@ installMagento() {
   # Index data
   executeMagentoCliInDocker indexer:reindex
 
+  # Add /etc/hosts entry
+  echo "Your system password has been requested to add an entry to /etc/hosts... \n"
+  echo "127.0.0.1 ${hostname}" | sudo tee -a /etc/hosts
+
   # Print results
   echo "\n"
   echo "Installation complete.\n"
