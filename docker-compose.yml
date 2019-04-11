@@ -89,6 +89,15 @@ services:
       - front
       - back
 
+  elasticsearch:
+    image: elasticsearch:5.6
+    ports:
+      - 9200:9200
+      - 9300:9300
+    networks:
+      - front
+      - back
+
 volumes:
     magento2mysqldata:
       driver: local
