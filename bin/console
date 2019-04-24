@@ -459,6 +459,7 @@ usage() {
   printf "  %-15s%-30s\n" "restart" "Restart the server"
   printf "  %-15s%-30s\n" "stop" "Stop the server"
   printf "  %-15s%-30s\n" "status" "Get the current server status"
+  printf "  %-15s%-30s\n" "log" "Show the server logs and all of its components"
 }
 
 case "$1" in
@@ -506,6 +507,10 @@ case "$1" in
 
     status)
     status
+    ;;
+
+    log)
+    log
     ;;
 
     *)
