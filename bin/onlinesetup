@@ -1,0 +1,44 @@
+#!/bin/bash
+DOMAIN=${1:-magento.local}
+VERSION=${2:-2.3.1}
+REPO=${3:-https://repo.magento.com/}
+# REPO=${3:-git@github.com:magento/magento2.git}
+DIR=$DOMAIN
+
+# Check availability of composer
+hash composer 2>/dev/null || { echo >&2 "The script requires \"composer\" (https://getcomposer.org/download/)"; exit 1; }
+
+# Check availability of docker
+hash docker 2>/dev/null || { echo >&2 "The script requires \"docker\" (https://docs.docker.com/install/linux/docker-ce/ubuntu/#install-docker-ce)"; exit 1; }
+
+# Check availability of docker-compose
+hash docker-compose 2>/dev/null || { echo >&2 "The script requires \"docker-compose\" (https://docs.docker.com/compose/install/)"; exit 1; }
+
+# Create magento composer project
+composer create-project --ignore-platform-reqs --prefer-source --repository=$REPO magento/project-community-edition=$VERSION $DIR
+
+# Change working dir
+cd $DIR
+
+# Add swissup repository
+composer config repositories.swissup composer https://docs.swissuplabs.com/packages/
+
+# Add swissup/dockerize-magento2 package
+composer config minimum-stability dev
+composer require swissup/dockerize-magento2:dev-master --prefer-source --ignore-platform-reqs
+composer config minimum-stability stable
+
+# Add execute permissions
+chmod +x bin/console
+chmod +x vendor/bin/dockerizer
+
+# Init git repository
+git init
+git add .
+git commit -am "Initial commit $DOMAIN : $VERSION"
+
+# Stop all docker containers
+docker stop $(docker ps -a -q) >/dev/null
+
+# Install magento
+vendor/bin/dockerizer install $DOMAIN

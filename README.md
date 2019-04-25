@@ -12,33 +12,54 @@ The composer package **arvatoscm/dockerize-magento2** deploys docker infrastruct
 
 For Linux users you must have a recent version of [docker](https://github.com/docker/docker/releases) and [docker-compose](https://github.com/docker/compose/releases) installed.
 
+ - [Install Docker CE](https://docs.docker.com/install/linux/docker-ce/ubuntu/#install-docker-ce)
+ - [Install Docker Compose](https://docs.docker.com/compose/install/)
+
+
 If you are a Mac or Windows user, use the [Docker Toolbox](https://www.docker.com/products/docker-toolbox).
 
-## PreInstallation
+
+## Setup
+
+### Automated Setup (New Project)
+
+Run this automated one-liner from the directory you want to install your project to:
 
 ```bash
- composer create-project --ignore-platform-reqs --repository-url=https://repo.magento.com/ magento/project-community-edition dockerize-magento2
+curl -s https://raw.githubusercontent.com/swissup/dockerize-magento2/develop/bin/onelinesetup | bash -s -- magento2.local 2.3.1
 ```
+
+### Manual Setup
+
+Install Magento using Composer
 
 ```bash
- composer create-project --ignore-platform-reqs --repository-url=https://repo.magento.com/ magento/project-community-edition=2.2.0 magento2
+ composer create-project --ignore-platform-reqs --repository=https://repo.magento.com/ magento/project-community-edition dockerize-magento2 magento2.local
 ```
 
-## Installation
+Or
+
+```bash
+ composer create-project --ignore-platform-reqs --repository=https://repo.magento.com/ magento/project-community-edition=2.3.1 magento2.local
+```
 
 Add `swissup/dockerize-magento2` to your existing Magento 2 shop:
 
 ```bash
+cd magento2.local
+
 composer config repositories.swissup composer https://docs.swissuplabs.com/packages/
 
 composer require swissup/dockerize-magento2 --ignore-platform-reqs
 
 composer config minimum-stability dev
-composer require swissup/dockerize-magento2:dev-develop --prefer-source --ignore-platform-reqs
+composer require swissup/dockerize-magento2:dev-master --prefer-source --ignore-platform-reqs
 composer config minimum-stability stable
 
 chmod +x bin/console
 chmod +x vendor/bin/dockerizer
+
+vendor/bin/dockerizer install magento2.local
 ```
 
 ## Usage
@@ -49,7 +70,7 @@ Trigger the Magento 2 installation process:
 
 ```bash
 vendor/bin/dockerizer install <hostname>
-vendor/bin/dockerizer install magento.local
+vendor/bin/dockerizer install magento2.local
 ```
 
 Start the docker containers:
@@ -68,6 +89,8 @@ Execute Magento CLI `bin/magento` inside the docker container:
 
 ```bash
 vendor/bin/dockerizer bin/magento [arguments]
+vendor/bin/dockerizer bin/magento setup:di:compile
+vendor/bin/dockerizer bin/magento cache:flush
 ```
 
 Run command inside the docker container:
@@ -81,6 +104,12 @@ Enter inside the docker container:
 
 ```bash
 vendor/bin/dockerizer enter [php|web|phpmyadmin]
+```
+
+Show the server logs and all of its components:
+
+```bash
+vendor/bin/dockerizer log
 ```
 
 For more information on how to use docker-compose visit: https://docs.docker.com/compose/
@@ -114,6 +143,19 @@ After customizing the parameters just run trigger the installation with `vendor/
 
 
 ## Troubleshooting
+
+### Solving Docker permission denied while trying to connect to the Docker daemon socket
+
+```bash
+sudo usermod -a -G docker $USER
+```
+
+### Solving web server port conflict
+
+```bash
+sudo /etc/init.d/apache2 stop
+sudo /etc/init.d/nginx stop
+```
 
 ### Add line to /etc/hosts
 
