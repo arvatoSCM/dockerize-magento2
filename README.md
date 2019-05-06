@@ -34,7 +34,7 @@ curl -s https://raw.githubusercontent.com/swissup/dockerize-magento2/develop/bin
 Install Magento using Composer
 
 ```bash
- composer create-project --ignore-platform-reqs --repository=https://repo.magento.com/ magento/project-community-edition dockerize-magento2 magento2.local
+ composer create-project --ignore-platform-reqs --repository=https://repo.magento.com/ magento/project-community-edition magento2.local
 ```
 
 Or
