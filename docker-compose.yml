@@ -97,9 +97,6 @@ services:
       - front
       - back
 
-  # redis:
-  #   image: redis:5.0
-
 volumes:
     magento2mysqldata:
       driver: local
