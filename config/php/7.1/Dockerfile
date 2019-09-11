@@ -9,6 +9,10 @@ RUN \
   libcurl4-gnutls-dev \
   libxml2-dev \
   libssl-dev
+  libfreetype6-dev \
+  lsof \
+  mysql-client \
+  vim
 
 RUN \
     /usr/local/bin/docker-php-ext-install \
