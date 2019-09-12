@@ -173,7 +173,7 @@ enterInDocker() {
 
   container=$1
   container="_"$container"_1"
-  container=$(docker ps | grep _php_1 | awk '{print $NF}')
+  container=$(docker ps | grep $container | awk '{print $NF}')
 
   # docker exec -ti $container bash
   docker exec -u 0 -ti $container bash
