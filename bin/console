@@ -402,6 +402,49 @@ log() {
 }
 
 #######################################
+# Open mysql cli
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+#######################################
+mysql() {
+
+  if [ $(isRunning) = false ]; then
+    echo >&2 "The components are not running";
+    exit 1;
+  fi
+
+  container=$(docker ps | grep _mysql_1 | awk '{print $NF}')
+
+  docker exec -ti $container mysql -u${DATABASE_USER} -p${DATABASE_PASSWORD} ${DATABASE_NAME}
+  # docker exec -u 0 -ti $container mysql -u${DATABASE_USER} -p${DATABASE_PASSWORD} ${DATABASE_NAME}
+}
+
+#######################################
+# Open redis cli
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+#######################################
+redis() {
+
+  if [ $(isRunning) = false ]; then
+    echo >&2 "The components are not running";
+    exit 1;
+  fi
+
+  container=$(docker ps | grep _cache_1 | awk '{print $NF}')
+
+  docker exec -ti $container redis-cli
+}
+
+#######################################
 # Restart the server and all of its
 # components
 # Globals:
@@ -460,6 +503,8 @@ usage() {
   printf "  %-15s%-30s\n" "stop" "Stop the server"
   printf "  %-15s%-30s\n" "status" "Get the current server status"
   printf "  %-15s%-30s\n" "log" "Show the server logs and all of its components"
+  printf "  %-15s%-30s\n" "mysql" "Open mysql console"
+  printf "  %-15s%-30s\n" "redis" "Open redis-cli"
 }
 
 case "$1" in
@@ -511,6 +556,14 @@ case "$1" in
 
     log)
     log
+    ;;
+
+    mysql)
+    mysql
+    ;;
+
+    redis)
+    redis
     ;;
 
     *)
