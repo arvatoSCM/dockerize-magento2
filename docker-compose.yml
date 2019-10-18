@@ -72,21 +72,21 @@ services:
       - back
 
   # https://blackfire.io/docs/integrations/docker
-  blackfire:
-    image: blackfire/blackfire:latest
-    env_file: .env
-    environment:
-        BLACKFIRE_SERVER_ID: ${BLACKFIRE_SERVER_ID}
-        BLACKFIRE_SERVER_TOKEN: ${BLACKFIRE_SERVER_TOKEN}
-        # Exposes the host BLACKFIRE_SERVER_ID and TOKEN environment variables.
-        # - BLACKFIRE_SERVER_ID
-        # - BLACKFIRE_SERVER_TOKEN
-        # You can also use global environment credentials :
-        # BLACKFIRE_SERVER_ID: SERVER-ID
-        # BLACKFIRE_SERVER_TOKEN: SERVER-TOKEN
-    networks:
-      - front
-      - back
+  # blackfire:
+  #   image: blackfire/blackfire:latest
+  #   env_file: .env
+  #   environment:
+  #       BLACKFIRE_SERVER_ID: ${BLACKFIRE_SERVER_ID}
+  #       BLACKFIRE_SERVER_TOKEN: ${BLACKFIRE_SERVER_TOKEN}
+  #       # Exposes the host BLACKFIRE_SERVER_ID and TOKEN environment variables.
+  #       # - BLACKFIRE_SERVER_ID
+  #       # - BLACKFIRE_SERVER_TOKEN
+  #       # You can also use global environment credentials :
+  #       # BLACKFIRE_SERVER_ID: SERVER-ID
+  #       # BLACKFIRE_SERVER_TOKEN: SERVER-TOKEN
+  #   networks:
+  #     - front
+  #     - back
 
   elasticsearch:
     image: elasticsearch:5.6
