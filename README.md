@@ -163,6 +163,17 @@ sudo /etc/init.d/nginx stop
 127.0.0.1 magento.local
 ```
 
+### Install sampledata
+
+```bash
+composer config http-basic.repo.magento.com [Public Key] [Private Key]
+sudo chown www-data auth.json
+
+vendor/bin/dockerizer bin/magento sampledata:deploy --no-update
+composer update --ignore-platform-reqs
+vendor/bin/dockerizer bin/magento setup:upgrade 
+```
+
 ### PHP 7.1 Support
 
 ```
