@@ -14,6 +14,9 @@ hash docker 2>/dev/null || { echo >&2 "The script requires \"docker\" (https://d
 # Check availability of docker-compose
 hash docker-compose 2>/dev/null || { echo >&2 "The script requires \"docker-compose\" (https://docs.docker.com/compose/install/)"; exit 1; }
 
+# Check docker ps
+docker ps -a -q
+
 # Check repo.magento.com credentials
 composer config -g http-basic.repo.magento.com 2>/dev/null || { echo >&2 "Get and set your magento <a href="https://devdocs.magento.com/guides/v2.3/install-gde/prereq/connect-auth.html">Access Keys</a>"; exit 1; }
 
