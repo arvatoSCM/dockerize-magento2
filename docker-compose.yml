@@ -20,7 +20,8 @@ services:
 
   php:
     # image: swissup/magento2-php:7.1
-    image: swissup/magento2-php:7.2
+    # image: swissup/magento2-php:7.2
+    image: swissup/magento2-php:7.3
     volumes:
       - ./config/php/php.ini:/usr/local/etc/php/php.ini
       - ./config/php/php-fpm.conf:/usr/local/etc/php-fpm.conf
