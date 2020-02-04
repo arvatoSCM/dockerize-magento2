@@ -20,7 +20,7 @@ services:
 
 
   php:
-    image: arvato/magento2-php:latest
+    build: .
     volumes:
       - ./config/php/php.ini:/usr/local/etc/php/php.ini
       - ./config/php/php-fpm.conf:/usr/local/etc/php-fpm.conf
