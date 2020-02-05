@@ -21,57 +21,48 @@ RUN \
 # php module build deps
 RUN \
   apt-get install -y \
-  g++ \
-  autoconf \
-  libbz2-dev \
-  libltdl-dev \
-  libpng12-dev \
-  libjpeg62-turbo-dev \
-  libfreetype6-dev \
-  libxpm-dev \
-  libimlib2-dev \
-  libicu-dev \
-  libmcrypt-dev \
-  libxslt1-dev \
-
-  re2c \
-  libpng++-dev \
-  libpng3 \
-  libvpx-dev \
-  zlib1g-dev \
-  libgd-dev \
-  libtidy-dev \
-  libmagic-dev \
-  libexif-dev \
-  file \
-  libssh2-1-dev \
-  libjpeg-dev \
+  cron \
   git \
-  curl \
-  wget \
-  librabbitmq-dev \
+  gzip \
+  libbz2-dev \
+  libfreetype6-dev \
+  libicu-dev \
+  libjpeg62-turbo-dev \
+  libmcrypt-dev \
+  libpng-dev \
+  libsodium-dev \
+  libssh2-1-dev \
+  libxslt1-dev \
   libzip-dev \
-  libzip2
+  lsof \
+  default-mysql-client \
+  vim \
+  zip \
+  libonig-dev
 
 # http://devdocs.magento.com/guides/v2.0/install-gde/system-requirements.html
 RUN \
     /usr/local/bin/docker-php-ext-install \
-    pdo \
-    sockets \
-    pdo_mysql \
-    mysqli \
-    mbstring \
-    mcrypt \
-    hash \
-    simplexml \
-    xsl \
-    soap \
-    intl \
     bcmath \
-    json \
+    bz2 \
+    calendar \
+    exif \
+    gd \
+    gettext \
+    intl \
+    mbstring \
+    mysqli \
     opcache \
+    pcntl \
+    pdo_mysql \
+    soap \
+    sockets \
+    sodium \
+    sysvmsg \
+    sysvsem \
+    sysvshm \
+    xsl \
     zip
-
 # Make sure the volume mount point is empty
 RUN rm -rf /var/www/html/*
 
@@ -85,7 +76,11 @@ RUN mkdir /var/log/php-fpm && \
     touch /var/log/php-fpm/error.log && \
     chown -R www-data:www-data /var/log/php-fpm
 
-RUN docker-php-ext-configure gd --with-freetype-dir=/usr --with-jpeg-dir=/usr --with-png-dir=/usr \
+# enabling gd extension
+# from PHP docs:
+# To enable support for FreeType 2 add --with-freetype-dir=DIR . 
+# As of PHP 7.4.0 use --with-freetype instead, which relies on pkg-config. 
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install gd
 
 # Install xdebug
