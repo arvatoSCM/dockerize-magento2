@@ -80,7 +80,7 @@ RUN mkdir /var/log/php-fpm && \
 # from PHP docs:
 # To enable support for FreeType 2 add --with-freetype-dir=DIR . 
 # As of PHP 7.4.0 use --with-freetype instead, which relies on pkg-config. 
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+RUN docker-php-ext-configure gd --with-freetype-dir=/usr --with-jpeg-dir=/usr --with-png-dir=/usr \
     && docker-php-ext-install gd
 
 # Install xdebug

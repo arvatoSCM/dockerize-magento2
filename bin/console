@@ -244,6 +244,10 @@ installMagento() {
   baseURLInsecure="http://${hostname}/"
   baseURLSecure="https://${hostname}/"
   backendURL="https://${hostname}/${BACKEND_FRONTNAME}"
+  echo "\n"
+  echo "Installation beggining.\n"
+  echo "If you see Class Magento\Framework\App\ResourceConnection\Proxy does not exist \n"
+  echo "is a common error caused by lack of permissions, fix sudo chmod -R 777 magentofolder/generated/"
   executeInDocker setup:install --base-url=$baseURLInsecure --base-url-secure=$baseURLSecure --backend-frontname=${BACKEND_FRONTNAME} \
                             --language=${DEFAULT_LANGUAGE} --currency=${DEFAULT_CURRENCY} --timezone=${DEFAULT_TIMEZONE} \
                             --db-host=mysql --db-name=${DATABASE_NAME} --db-user=${DATABASE_USER} --db-password=${DATABASE_PASSWORD} \
