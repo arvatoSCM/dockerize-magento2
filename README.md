@@ -13,7 +13,7 @@ composer create-project --ignore-platform-reqs --repository=https://repo.magento
 
 2. Instalar as ferramentas para rodar docker:
 ```
-sudo git clone https://github.com/araujoantonio/dockerize-magento2/tree/master
+sudo git clone https://github.com/araujoantonio/dockerize-magento2.git
 sudo cp -r dockerize-magento2/* magento/
 ```
 
