@@ -14,12 +14,14 @@ composer create-project --ignore-platform-reqs --repository=https://repo.magento
 2. Instalar as ferramentas para rodar docker:
 ```
 sudo git clone https://github.com/araujoantonio/dockerize-magento2.git
-sudo cp -r dockerize-magento2/* magento/
+sudo cp -r dockerize-magento2/. magento/
 ```
 
 ```bash
+cd magento/
 chmod +x bin/console
 chmod +x bin/magento
+sudo chmod -R 777 generated/
 ```
 
 
@@ -32,8 +34,7 @@ Usando CMDER o path do openssl é o seguinte:
 
 ```bash
 set OPENSSL_CONF=c:/{path to openSSL}/bin/openssl.cfg
-cd config/nginx/ssl
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout key.pem -out cert.pem
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout config/nginx/ssl/key.pem -out config/nginx/ssl/cert.pem
 ```
 
 # Usando o ambiente
