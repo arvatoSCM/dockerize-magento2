@@ -1,4 +1,4 @@
-# Para iniciar o projeto:
+# Initialization:
 
 ### Requirements:
 Composer, Docker, Docker compose
