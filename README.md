@@ -1,95 +1,67 @@
-# Dockerize Magento 2
+# Initialization:
 
-A composer package for dockerizing Magento 2
+### Requirements:
+Composer, Docker, Docker compose
 
-The composer package **arvatoscm/dockerize-magento2** deploys docker infrastructure defintion files such as [docker-compose.yml](docker-compose.yml) to your Magento 2 root folder and enables you to host your Magento 2 shops without having to install Apache/Nginx, MySQL or PHP on your system.
-
-## Package Name
-
-`arvatoscm/dockerize-magento2`
-
-## Software Requirements
-
-For Linux users you must have a recent version of [docker](https://github.com/docker/docker/releases) and [docker-compose](https://github.com/docker/compose/releases) installed.
-
-If you are a Mac or Windows user, use the [Docker Toolbox](https://www.docker.com/products/docker-toolbox).
-
-## Installation
-
-Add `arvatoscm/dockerize-magento2` to your existing Magento 2 shop:
+### Installation:
+1. Initialize Magento Project (docs: https://devdocs.magento.com/guides/v2.3/install-gde/composer.html)
 
 ```bash
-composer require --ignore-platform-reqs arvatoscm/dockerize-magento2
+composer config --global http-basic.repo.magento.com <key> <pwd>
+composer create-project --ignore-platform-reqs --repository=https://repo.magento.com/ magento/project-community-edition magento
+```
+
+2. Run Docker environment:
+```
+sudo git clone https://github.com/araujoantonio/dockerize-magento2.git
+sudo cp -r dockerize-magento2/. magento/
+```
+
+```bash
+cd magento/
 chmod +x bin/console
+chmod +x bin/magento
+sudo chmod -R 777 generated/
 ```
 
-This will place some files in your Magento root:
 
-- `docker-compose.yml`
-The docker infrastructure definition
-- `bin/console`
-A utility script for controlling dockerized Magento projects
-- `config`
-A folder which contains the configuration files for PHP, Nginx and phpMyAdmin
-
-
-## Usage
-
-`dockerize-magento2` comes with `bin/console` script that can be used to install Magento and to execute Magentos' bin/magento script inside the PHP docker container:
-
-Trigger the Magento 2 installation process:
-
+3. Run Installation
 ```bash
-bin/console install <hostname>
+sudo bin/console install <hostname>
+
+# example:
+sudo bin/console isntall 192.168.1.100
+```
+3.1 If SSL certs creation fails:
+```bash
+set OPENSSL_CONF=c:/{path to openSSL}/bin/openssl.cfg
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout config/nginx/ssl/key.pem -out config/nginx/ssl/cert.pem
 ```
 
+# Using the environment
 Start the docker containers:
 
-```bash
-bin/console start
-```
+`bin/console start`
 
 Stop the docker containers:
 
-```bash
-bin/console stop
-```
+`bin/console stop`
 
-Execute `bin/magento` inside the docker container:
+Execute bin/magento inside the docker container:
 
-```bash
-bin/console exec [arguments]
-```
+`bin/console exec [arguments]`
 
 For more information on how to use docker-compose visit: https://docs.docker.com/compose/
 
-## Configuration
-
-The `install` action depends on some parameters such as usernames and passwords. We have put in some default values for you that will work for a quick test:
-
+# Frequent erros
 ```
-DATABASE_NAME="magento2dockerized"
-DATABASE_USER="magento"
-DATABASE_PASSWORD="enAVINa2"
-DATABASE_ROOT_PASSWORD="enAVINa2"
-
-ADMIN_USERNAME="admin"
-ADMIN_FIRSTNAME="Admin"
-ADMIN_LASTNAME="Inistrator"
-ADMIN_EMAIL="johndoe@example.com"
-ADMIN_PASSWORD="enAVINa2"
-
-DEFAULT_LANGUAGE="en_US"
-DEFAULT_CURRENCY="EUR"
-DEFAULT_TIMEZONE="Europe/Berlin"
-
-BACKEND_FRONTNAME="management"
+Deprecated Functionality: Function ReflectionType::__toString() is deprecated in
+/var/www/html/vendor/zendframework/zend-code/src/Reflection/ParameterReflection
+.php on line 84
 ```
+PHP version isn't supported.
 
-If you want to use different parameters change the values in the [.env](.env) file to your needs.
-After customizing the parameters just run trigger the installation with `bin/console install <hostname>`.
-
-## Licensing
-
-dockerize-magento2 is licensed under the Apache License, Version 2.0.
-See [LICENSE](LICENSE) for the full license text.
+```bash
+Class Magento\Framework\App\ResourceConnection\Proxy does not exist
+```
+Make sure that the folders have the right permissions.
