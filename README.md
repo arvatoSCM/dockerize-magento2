@@ -220,18 +220,46 @@ Add to composer.json
 
 ### Elasticsearch Support
 
-Added support for Elasticsearch 5.x. Go to Admin > Stores > Configuration > Catalog > Catalog > Catalog Search, and select "Elasticsarch 5.0+" from the list of options. Keep all defaults the same, but set Elasticsearch Server Hostname to elasticsearch. Auth set Yes. Default username 'elastic' and pass 'changeme'. Save, clear the cache, and run bin/magento indexer:reindex to enable.
+Added support for Elasticsearch 5.x. Go to Admin > Stores > Configuration > Catalog > Catalog > Catalog Search, and select "Elasticsarch 5.0+" from the list of options.
+Keep all defaults the same, but set Elasticsearch Server Hostname to "elasticsearch". 
+Auth set Yes. Default username 'elastic' and pass 'changeme'. 
+Save, clear the cache, and run bin/magento indexer:reindex to enable.
 
 https://devdocs.magento.com/guides/v2.3/config-guide/elasticsearch/configure-magento.html
 
 ```
 vendor/bin/dockerizer enter php
-#curl -u elastic  http://elasti:9200/_cat/health
+#curl -u elastic  http://elasticsearch:9200/_cat/health
 Enter host password for user 'elastic': [changeme]
 1554965499 06:51:39 elasticsearch green 1 1 0 0 0 0 0 0 - 100.0%
 exit
 vendor/bin/dockerizer bin/magento indexer:reindex
 ```
+
+##### Elasticsearch 7
+Added support for Elasticsearch 7. 
+
+Increase system value 
+```
+sudo sysctl -w vm.max_map_count=262144 
+```
+and replace/add in docker-compose.yml
+```yml
+    image: elasticsearch:7.6.2
+    environment:
+      - discovery.type=single-node
+```
+run 
+```bash
+vendor/bin/dockerizer start
+```
+and log for debugging
+```bash
+vendor/bin/dockerizer log
+```
+
+Go to Admin > Stores > Configuration > Catalog > Catalog > Catalog Search, and select "Elasticsarch 7" from the list of options.
+Keep all defaults the same, but set Elasticsearch Server Hostname to "elasticsearch". 
 
 ## Licensing
 

@@ -19,7 +19,9 @@ services:
       - back
 
   php:
-    image: swissup/magento2-php:7.1
+    # image: swissup/magento2-php:7.1
+    # image: swissup/magento2-php:7.2
+    image: swissup/magento2-php:7.3
     volumes:
       - ./config/php/php.ini:/usr/local/etc/php/php.ini
       - ./config/php/php-fpm.conf:/usr/local/etc/php-fpm.conf
@@ -90,6 +92,11 @@ services:
 
   elasticsearch:
     image: elasticsearch:5.6
+#    7.6.2 integration
+#    sudo sysctl -w vm.max_map_count=262144
+#    image: elasticsearch:7.6.2
+#    environment:
+#     - discovery.type=single-node
     ports:
       - 9200:9200
       - 9300:9300
