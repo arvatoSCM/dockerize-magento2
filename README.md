@@ -26,7 +26,7 @@ If you are a Mac or Windows user, use the [Docker Toolbox](https://www.docker.co
 Run this automated one-liner from the directory you want to install your project to:
 
 ```bash
-curl -s https://raw.githubusercontent.com/swissup/dockerize-magento2/develop/bin/onelinesetup | bash -s -- magento2.local 2.3.5-p1
+curl -s https://raw.githubusercontent.com/swissup/dockerize-magento2/develop/bin/onelinesetup | bash -s -- magento235.local 2.3.5-p1
 `
 
 ### Manual Setup
@@ -34,13 +34,13 @@ curl -s https://raw.githubusercontent.com/swissup/dockerize-magento2/develop/bin
 Install Magento using Composer
 
 ```bash
- composer create-project --ignore-platform-reqs --repository=https://repo.magento.com/ magento/project-community-edition magento2.local
+ composer create-project --ignore-platform-reqs --repository=https://repo.magento.com/ magento/project-community-edition magento235.local
 ```
 
 Or
 
 ```bash
- composer create-project --ignore-platform-reqs --repository=https://repo.magento.com/ magento/project-community-edition=2.3.5-p1 magento2.local
+ composer create-project --ignore-platform-reqs --repository=https://repo.magento.com/ magento/project-community-edition=2.3.5-p1 magento235.local
 ```
 
 Add `swissup/dockerize-magento2` to your existing Magento 2 shop:
@@ -59,7 +59,7 @@ composer config minimum-stability stable
 chmod +x bin/console
 chmod +x vendor/bin/dockerizer
 
-vendor/bin/dockerizer install magento2.local
+vendor/bin/dockerizer install magento235.local
 ```
 
 ## Usage
