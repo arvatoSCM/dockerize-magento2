@@ -50,13 +50,28 @@ docker stop $(docker ps -a -q) >/dev/null
 vendor/bin/dockerizer install $DOMAIN
 
 #Create auth.json 
-composer config http-basic.repo.magento.com $(composer config -g http-basic.repo.magento.com.username) $(composer config -g http-basic.repo.magento.com.password)
-chmod +r auth.json
+read -p "do create auth.json? " -n 1 -r
+echo    # (optional) move to a new line
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+    composer config http-basic.repo.magento.com $(composer config -g http-basic.repo.magento.com.username) $(composer config -g http-basic.repo.magento.com.password)
+    chmod +r auth.json
+fi
 
 # Add sample-data
-vendor/bin/dockerizer bin/magento sampledata:deploy --no-update
-composer update --ignore-platform-reqs
-vendor/bin/dockerizer bin/magento setup:upgrade
+read -p "Add sample-data modules?" -n 1 -r
+echo    # (optional) move to a new line
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+   vendor/bin/dockerizer bin/magento sampledata:deploy --no-update
+   composer update --ignore-platform-reqs
+   vendor/bin/dockerizer bin/magento setup:upgrade
+fi
 
 # Install all swissup modules
-curl -s https://raw.githubusercontent.com/swissup/swissup.github.io/master/m2/dev/install | bash -s
+read -p "Install all swissup modules?" -n 1 -r
+echo    # (optional) move to a new line
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+   curl -s https://raw.githubusercontent.com/swissup/swissup.github.io/master/m2/dev/install | bash -s
+fi
