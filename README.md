@@ -27,7 +27,7 @@ Run this automated one-liner from the directory you want to install your project
 
 ```bash
 curl -s https://raw.githubusercontent.com/swissup/dockerize-magento2/develop/bin/onelinesetup | bash -s -- magento235.local 2.3.5-p1
-`
+```
 
 ### Manual Setup
 
