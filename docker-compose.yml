@@ -91,12 +91,12 @@ services:
   #     - back
 
   elasticsearch:
-    image: elasticsearch:5.6
+#    image: elasticsearch:5.6
 #    7.6.2 integration
 #    sudo sysctl -w vm.max_map_count=262144
-#    image: elasticsearch:7.6.2
-#    environment:
-#     - discovery.type=single-node
+    image: elasticsearch:7.6.2
+    environment:
+      - discovery.type=single-node
     ports:
       - 9200:9200
       - 9300:9300
