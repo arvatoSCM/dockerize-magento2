@@ -285,15 +285,23 @@ installMagento() {
   # wait for MySQL to come up
   sleep 30
 
+  version=$(executeMagentoCliInDocker --version | cut -d' ' -f3)
+  requiredver="2.4.0"
+  ELASTICSEARCH_CONFIG=""
+  if [ "$(printf '%s\n' "$requiredver" "$version" | sort -V | head -n1)" = "$requiredver" ]; then
+      ELASTICSEARCH_CONFIG="--search-engine=${SEARCH_ENGINE} --elasticsearch-host=${ELASTICSEARCH_HOST} --elasticsearch-port=${ELASTICSEARCH_PORT} --elasticsearch-enable-auth=1 --elasticsearch-username=${ELASTICSEARCH_USERNAME} --elasticsearch-password=${ELASTICSEARCH_PASSWORD}"
+  fi
+
   # Install magento 2
   baseURLInsecure="http://${hostname}/"
   baseURLSecure="https://${hostname}/"
   backendURL="https://${hostname}/${BACKEND_FRONTNAME}"
   executeMagentoCliInDocker setup:install --base-url=$baseURLInsecure --base-url-secure=$baseURLSecure --backend-frontname=${BACKEND_FRONTNAME} \
-                            --language=${DEFAULT_LANGUAGE} --currency=${DEFAULT_CURRENCY} --timezone=${DEFAULT_TIMEZONE} \
-                            --db-host=mysql --db-name=${DATABASE_NAME} --db-user=${DATABASE_USER} --db-password=${DATABASE_PASSWORD} \
-                            --admin-firstname=${ADMIN_FIRSTNAME} --admin-lastname=${ADMIN_LASTNAME} --admin-email=${ADMIN_EMAIL} --admin-user=${ADMIN_USERNAME} --admin-password=${ADMIN_PASSWORD} \
-                            --cleanup-database --session-save=db
+    --language=${DEFAULT_LANGUAGE} --currency=${DEFAULT_CURRENCY} --timezone=${DEFAULT_TIMEZONE} \
+    --db-host=mysql --db-name=${DATABASE_NAME} --db-user=${DATABASE_USER} --db-password=${DATABASE_PASSWORD} \
+    --admin-firstname=${ADMIN_FIRSTNAME} --admin-lastname=${ADMIN_LASTNAME} --admin-email=${ADMIN_EMAIL} --admin-user=${ADMIN_USERNAME} --admin-password=${ADMIN_PASSWORD} \
+    --cleanup-database --session-save=db \
+    ${ELASTICSEARCH_CONFIG}
 
   # Install and update modules
   executeMagentoCliInDocker setup:upgrade
