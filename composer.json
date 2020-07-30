@@ -27,9 +27,7 @@
         ".env"
       ],
       [
-        "bin/dockerizer"
-      ],
-      [
+        "bin/dockerizer",
         "vendor/bin/dockerizer"
       ]
     ]
