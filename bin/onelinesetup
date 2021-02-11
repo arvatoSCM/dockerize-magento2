@@ -74,6 +74,6 @@ echo    # (optional) move to a new line
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
    # curl -s https://raw.githubusercontent.com/swissup/swissup.github.io/master/m2/dev/install | bash -s
-   # curl -s https://gist.githubusercontent.com/0m3r/954fc98bda36f90e4580e7eee641cc05/raw/ccafd49f4fe0b0879357fda6d1ba39090be2436b/install.bash | bash -s
-   (curl -s https://gist.githubusercontent.com/0m3r/954fc98bda36f90e4580e7eee641cc05/raw/ccafd49f4fe0b0879357fda6d1ba39090be2436b/install.bash > install.bash) && chmod +x install.bash && ./install.bash && rm -rf install.bash
+   # curl -s https://gist.githubusercontent.com/0m3r/954fc98bda36f90e4580e7eee641cc05/raw/b327e5644af562a403b26ff8bf44504192e20e65/install.bash | bash -s
+   (curl -s https://gist.githubusercontent.com/0m3r/954fc98bda36f90e4580e7eee641cc05/raw/b327e5644af562a403b26ff8bf44504192e20e65/install.bash > install.bash) && chmod +x install.bash && ./install.bash && rm -rf install.bash
 fi
