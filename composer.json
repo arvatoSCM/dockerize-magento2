@@ -27,11 +27,7 @@
         ".env"
       ],
       [
-        "bin/console",
-        "bin/console"
-      ],
-      [
-        "bin/console",
+        "bin/dockerizer",
         "vendor/bin/dockerizer"
       ]
     ]
