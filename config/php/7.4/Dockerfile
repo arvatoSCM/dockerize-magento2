@@ -72,7 +72,7 @@ RUN curl -sS https://getcomposer.org/installer | \
   php -- --1 --install-dir=/usr/local/bin --filename=composer
 
 # Install blackfire.io
-RUN apt-get install -y gnupg 
+RUN apt-get install -y gnupg
 RUN curl -s https://packages.blackfire.io/gpg.key | apt-key add - \
   && echo "deb http://packages.blackfire.io/debian any main" | tee /etc/apt/sources.list.d/blackfire.list \
   && apt-get update \

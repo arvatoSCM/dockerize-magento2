@@ -1,4 +1,4 @@
-version: '2'
+version: '3'
 services:
   web:
     image: nginx:latest
@@ -10,8 +10,10 @@ services:
       - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./config/nginx/ssl:/etc/nginx/ssl
       - ./config/nginx/auth:/etc/nginx/auth
-    volumes_from:
-      - appdata
+      # volumes_from:
+      #  - appdata
+      - ./config/appdata/startup.sh:/startup.sh
+      - .:/var/www/html
     depends_on:
       - php
     networks:
@@ -21,13 +23,16 @@ services:
   php:
     # image: swissup/magento2-php:7.1
     # image: swissup/magento2-php:7.2
-    image: swissup/magento2-php:7.3
+    # image: swissup/magento2-php:7.3
+    image: swissup/magento2-php:7.4
     volumes:
       - ./config/php/php.ini:/usr/local/etc/php/php.ini
       - ./config/php/php-fpm.conf:/usr/local/etc/php-fpm.conf
       - ./config/php/ext-xdebug.ini:/usr/local/etc/php/conf.d/ext-xdebug.ini
-    volumes_from:
-      - appdata
+      # volumes_from:
+      #  - appdata
+      - ./config/appdata/startup.sh:/startup.sh
+      - .:/var/www/html
     env_file: .env
     depends_on:
       - appdata
@@ -104,6 +109,26 @@ services:
       - front
       - back
 
+#  varnish:
+#    image: fballiano/varnish
+#    ports:
+#      - 80:80
+#      - 6082:6082
+#    depends_on:
+#      - php
+#      - web
+#    links:
+#      - web
+#      - php
+#    networks:
+#      - front
+#      - back
+#    volumes:
+#      - ./config/varnish/varnish.vcl:/etc/varnish/default.vcl
+#      - ./config/varnish/varnish.secret:/etc/varnish/secret
+#    environment:
+#      - CACHE_SIZE=256M
+
   mailhog:
     image: mailhog/mailhog
     logging:
@@ -114,6 +139,7 @@ services:
     networks:
       - front
       - back
+
 volumes:
     magento2mysqldata:
       driver: local
