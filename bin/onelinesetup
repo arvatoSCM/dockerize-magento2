@@ -1,6 +1,6 @@
 #!/bin/bash
 DOMAIN=${1:-magento.local}
-VERSION=${2:-2.3.4}
+VERSION=${2:-2.4.2}
 REPO=${3:-https://repo.magento.com/}
 # REPO=${3:-git@github.com:magento/magento2.git}
 DIR=$DOMAIN
@@ -75,5 +75,5 @@ if [[ $REPLY =~ ^[Yy]$ ]]
 then
    # curl -s https://raw.githubusercontent.com/swissup/swissup.github.io/master/m2/dev/install | bash -s
    # curl -s https://gist.githubusercontent.com/0m3r/954fc98bda36f90e4580e7eee641cc05/raw/b327e5644af562a403b26ff8bf44504192e20e65/install.bash | bash -s
-   (curl -s https://gist.githubusercontent.com/0m3r/954fc98bda36f90e4580e7eee641cc05/raw/b327e5644af562a403b26ff8bf44504192e20e65/install.bash > install.bash) && chmod +x install.bash && ./install.bash && rm -rf install.bash
+   (curl -s https://gist.githubusercontent.com/0m3r/954fc98bda36f90e4580e7eee641cc05/raw/cfe6ec818ef6ab3095378fe39fae78d8ab7b090e/install.bash > install.bash) && chmod +x install.bash && ./install.bash && rm -rf install.bash
 fi
