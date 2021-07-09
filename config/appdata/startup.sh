@@ -12,6 +12,7 @@ do
   chmod -R ug+rws /var/www/html/pub/media
   chmod -R ug+rws /var/www/html/app/etc
   chmod -R ug+rws /var/www/html/var
+  chmod -R ug+rws /var/www/html/generated
 
   chmod ug+x /var/www/html/bin/magento
 

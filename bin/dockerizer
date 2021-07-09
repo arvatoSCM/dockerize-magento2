@@ -123,7 +123,7 @@ hash docker-compose 2>/dev/null || { echo >&2 "$SCRIPTNAME requires \"docker-com
 # Returns:
 #   None
 #######################################
-executeInDocker() {
+executeMagentoCliInDocker() {
 
   if [ $(isRunning) = false ]; then
     echo >&2 "Docker is not running. Please start the containers first.";
@@ -131,7 +131,52 @@ executeInDocker() {
   fi
 
   # pass the arguments to the bin/magento script inside the PHP container
-  docker-compose exec php bash -c "bin/magento $*"
+  docker-compose exec -T php bash -c "php -d memory_limit=-1 bin/magento $*"
+}
+
+#######################################
+# Execute command inside the php docker
+# container with all given arguments.
+# Globals:
+#   None
+# Arguments:
+#   *
+# Returns:
+#   None
+#######################################
+executeInDocker() {
+
+  if [ $(isRunning) = false ]; then
+    echo >&2 "Docker is not running. Please start the containers first.";
+    exit 1;
+  fi
+
+  # pass the arguments to the bash script inside the PHP container
+  docker-compose exec php bash -c "$*"
+}
+
+#######################################
+# Enter to the container
+# Globals:
+#   None
+# Arguments:
+#   container (web, php, cache, phpmyadmin, mysql, appdata)
+# Returns:
+#   None
+#######################################
+enterInDocker() {
+
+  if [ $(isRunning) = false ]; then
+    echo >&2 "Docker is not running. Please start the containers first.";
+    exit 1;
+  fi
+
+  container=$1
+  container="_"$container"_1"
+  container=$(docker ps | grep $container | awk '{print $NF}')
+
+  # docker exec -ti $container bash
+  docker exec -u 0 -ti $container bash
 }
 
 #######################################
@@ -240,24 +285,36 @@ installMagento() {
   # wait for MySQL to come up
   sleep 30
 
+  version=$(executeMagentoCliInDocker --version | cut -d' ' -f3)
+  requiredver="2.4.0"
+  ELASTICSEARCH_CONFIG=""
+  if [ "$(printf '%s\n' "$requiredver" "$version" | sort -V | head -n1)" = "$requiredver" ]; then
+      ELASTICSEARCH_CONFIG="--search-engine=${SEARCH_ENGINE} --elasticsearch-host=${ELASTICSEARCH_HOST} --elasticsearch-port=${ELASTICSEARCH_PORT} --elasticsearch-enable-auth=1 --elasticsearch-username=${ELASTICSEARCH_USERNAME} --elasticsearch-password=${ELASTICSEARCH_PASSWORD}"
+  fi
+
   # Install magento 2
   baseURLInsecure="http://${hostname}/"
   baseURLSecure="https://${hostname}/"
   backendURL="https://${hostname}/${BACKEND_FRONTNAME}"
-  executeInDocker setup:install --base-url=$baseURLInsecure --base-url-secure=$baseURLSecure --backend-frontname=${BACKEND_FRONTNAME} \
-                            --language=${DEFAULT_LANGUAGE} --currency=${DEFAULT_CURRENCY} --timezone=${DEFAULT_TIMEZONE} \
-                            --db-host=mysql --db-name=${DATABASE_NAME} --db-user=${DATABASE_USER} --db-password=${DATABASE_PASSWORD} \
-                            --admin-firstname=${ADMIN_FIRSTNAME} --admin-lastname=${ADMIN_LASTNAME} --admin-email=${ADMIN_EMAIL} --admin-user=${ADMIN_USERNAME} --admin-password=${ADMIN_PASSWORD} \
-                            --cleanup-database --session-save=db
+  executeMagentoCliInDocker setup:install --base-url=$baseURLInsecure --base-url-secure=$baseURLSecure --backend-frontname=${BACKEND_FRONTNAME} \
+    --language=${DEFAULT_LANGUAGE} --currency=${DEFAULT_CURRENCY} --timezone=${DEFAULT_TIMEZONE} \
+    --db-host=mysql --db-name=${DATABASE_NAME} --db-user=${DATABASE_USER} --db-password=${DATABASE_PASSWORD} \
+    --admin-firstname=${ADMIN_FIRSTNAME} --admin-lastname=${ADMIN_LASTNAME} --admin-email=${ADMIN_EMAIL} --admin-user=${ADMIN_USERNAME} --admin-password=${ADMIN_PASSWORD} \
+    --cleanup-database --session-save=db \
+    ${ELASTICSEARCH_CONFIG}
 
   # Install and update modules
-  executeInDocker setup:upgrade
+  executeMagentoCliInDocker setup:upgrade
 
   # Clear cache
-  executeInDocker cache:clean
+  executeMagentoCliInDocker cache:clean
 
   # Index data
-  executeInDocker indexer:reindex
+  executeMagentoCliInDocker indexer:reindex
+
+  # Add /etc/hosts entry
+  echo "Your system password has been requested to add an entry to /etc/hosts... \n"
+  echo "127.0.0.1 ${hostname}" | sudo tee -a /etc/hosts
 
   # Print results
   echo "\n"
@@ -326,8 +383,73 @@ start() {
   fi
 
   # start docker containers
+  # docker-compose -f $DOCKERCOMPOSEFILE up -d && docker-compose logs -f
   docker-compose -f $DOCKERCOMPOSEFILE up -d
 
+}
+
+#######################################
+# Show the server logs and all of its
+# components
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+#######################################
+log() {
+
+  if [ $(isRunning) = false ]; then
+    echo >&2 "The components are not running";
+    exit 1;
+  fi
+
+  # start docker containers
+  docker-compose logs -f
+}
+
+#######################################
+# Open mysql cli
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+#######################################
+mysql() {
+
+  if [ $(isRunning) = false ]; then
+    echo >&2 "The components are not running";
+    exit 1;
+  fi
+
+  container=$(docker ps | grep _mysql_1 | awk '{print $NF}')
+
+  docker exec -ti $container mysql -u${DATABASE_USER} -p${DATABASE_PASSWORD} ${DATABASE_NAME}
+  # docker exec -u 0 -ti $container mysql -u${DATABASE_USER} -p${DATABASE_PASSWORD} ${DATABASE_NAME}
+}
+
+#######################################
+# Open redis cli
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+#######################################
+redis() {
+
+  if [ $(isRunning) = false ]; then
+    echo >&2 "The components are not running";
+    exit 1;
+  fi
+
+  container=$(docker ps | grep _cache_1 | awk '{print $NF}')
+
+  docker exec -ti $container redis-cli
 }
 
 #######################################
@@ -380,12 +502,17 @@ usage() {
   echo ""
   echo "Actions:\n"
   printf "  %-15s%-30s\n" "install" "Install Magento"
-  printf "  %-15s%-30s\n" "exec" "Execute bin/magento inside docker"
+  printf "  %-15s%-30s\n" "bin/magento" "Execute bin/magento inside docker"
+  printf "  %-15s%-30s\n" "bash" "Run command inside docker"
+  printf "  %-15s%-30s\n" "enter" "Enter inside docker container"
   echo ""
   printf "  %-15s%-30s\n" "start" "Start the server and all of its components"
   printf "  %-15s%-30s\n" "restart" "Restart the server"
   printf "  %-15s%-30s\n" "stop" "Stop the server"
   printf "  %-15s%-30s\n" "status" "Get the current server status"
+  printf "  %-15s%-30s\n" "log" "Show the server logs and all of its components"
+  printf "  %-15s%-30s\n" "mysql" "Open mysql console"
+  printf "  %-15s%-30s\n" "redis" "Open redis-cli"
 }
 
 case "$1" in
@@ -394,9 +521,29 @@ case "$1" in
     installMagento $*
     ;;
 
+    bin/magento)
+    shift 1
+    executeMagentoCliInDocker $*
+    ;;
+
     exec)
     shift 1
+    executeMagentoCliInDocker $*
+    ;;
+
+    bash)
+    shift 1
     executeInDocker $*
+    ;;
+
+    run)
+    shift 1
+    executeInDocker $*
+    ;;
+
+    enter)
+    shift 1
+    enterInDocker $*
     ;;
 
     start)
@@ -413,6 +560,18 @@ case "$1" in
 
     status)
     status
+    ;;
+
+    log)
+    log
+    ;;
+
+    mysql)
+    mysql
+    ;;
+
+    redis)
+    redis
     ;;
 
     *)

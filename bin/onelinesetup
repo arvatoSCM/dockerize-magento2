@@ -1,0 +1,79 @@
+#!/bin/bash
+DOMAIN=${1:-magento.local}
+VERSION=${2:-2.4.2}
+REPO=${3:-https://repo.magento.com/}
+# REPO=${3:-git@github.com:magento/magento2.git}
+DIR=$DOMAIN
+
+# Check availability of composer
+hash composer 2>/dev/null || { echo >&2 "The script requires \"composer\" (https://getcomposer.org/download/)"; exit 1; }
+
+# Check availability of docker
+hash docker 2>/dev/null || { echo >&2 "The script requires \"docker\" (https://docs.docker.com/install/linux/docker-ce/ubuntu/#install-docker-ce)"; exit 1; }
+
+# Check availability of docker-compose
+hash docker-compose 2>/dev/null || { echo >&2 "The script requires \"docker-compose\" (https://docs.docker.com/compose/install/)"; exit 1; }
+
+# Check docker ps
+docker ps -a -q
+
+# Check repo.magento.com credentials
+composer config -g http-basic.repo.magento.com 2>/dev/null || { echo >&2 "Get and set your magento <a href="https://devdocs.magento.com/guides/v2.3/install-gde/prereq/connect-auth.html">Access Keys</a>"; exit 1; }
+
+# Create magento composer project
+composer create-project --ignore-platform-reqs --prefer-source --repository=$REPO magento/project-community-edition=$VERSION $DIR
+
+# Change working dir
+cd $DIR
+
+# Add swissup repository
+composer config repositories.swissup composer https://docs.swissuplabs.com/packages/
+
+# Add swissup/dockerize-magento2 package
+composer config minimum-stability dev
+composer require swissup/dockerize-magento2:dev-master --prefer-source --ignore-platform-reqs
+composer config minimum-stability stable
+
+# Add execute permissions
+chmod +x bin/console
+chmod +x vendor/bin/dockerizer
+
+# Init git repository
+git init
+git add .
+git commit -am "Initial commit $DOMAIN : $VERSION"
+
+# Stop all docker containers
+docker stop $(docker ps -a -q) >/dev/null
+
+# Install magento
+vendor/bin/dockerizer install $DOMAIN
+
+#Create auth.json 
+read -p "do create auth.json? " -n 1 -r
+echo    # (optional) move to a new line
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+    composer config http-basic.repo.magento.com $(composer config -g http-basic.repo.magento.com.username) $(composer config -g http-basic.repo.magento.com.password)
+    chmod +r auth.json
+fi
+
+# Add sample-data
+read -p "Add sample-data modules?" -n 1 -r
+echo    # (optional) move to a new line
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+   vendor/bin/dockerizer bin/magento sampledata:deploy --no-update
+   composer update --ignore-platform-reqs
+   vendor/bin/dockerizer bin/magento setup:upgrade
+fi
+
+# Install all swissup modules
+read -p "Install all swissup modules?" -n 1 -r
+echo    # (optional) move to a new line
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+   # curl -s https://raw.githubusercontent.com/swissup/swissup.github.io/master/m2/dev/install | bash -s
+   # curl -s https://gist.githubusercontent.com/0m3r/954fc98bda36f90e4580e7eee641cc05/raw/b327e5644af562a403b26ff8bf44504192e20e65/install.bash | bash -s
+   (curl -s https://gist.githubusercontent.com/0m3r/954fc98bda36f90e4580e7eee641cc05/raw/cfe6ec818ef6ab3095378fe39fae78d8ab7b090e/install.bash > install.bash) && chmod +x install.bash && ./install.bash && rm -rf install.bash
+fi

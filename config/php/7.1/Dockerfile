@@ -1,4 +1,4 @@
-FROM php:7.0-fpm
+FROM php:7.1-fpm
 
 ENV PHP_EXTRA_CONFIGURE_ARGS --enable-fpm --with-fpm-user=www-data --with-fpm-group=www-data --enable-intl --enable-opcache --enable-zip
 
@@ -25,7 +25,7 @@ RUN \
   autoconf \
   libbz2-dev \
   libltdl-dev \
-  libpng12-dev \
+  libpng-dev \
   libjpeg62-turbo-dev \
   libfreetype6-dev \
   libxpm-dev \
@@ -36,7 +36,6 @@ RUN \
 
   re2c \
   libpng++-dev \
-  libpng3 \
   libvpx-dev \
   zlib1g-dev \
   libgd-dev \
@@ -51,7 +50,7 @@ RUN \
   wget \
   librabbitmq-dev \
   libzip-dev \
-  libzip2
+  zip
 
 # http://devdocs.magento.com/guides/v2.0/install-gde/system-requirements.html
 RUN \
@@ -96,6 +95,33 @@ RUN cd /tmp/ && git clone https://github.com/xdebug/xdebug.git \
     && rm -r /tmp/xdebug \
     && apt-get purge -y --auto-remove
 
-RUN apk update && apk add curl && \
+# Install composer
+RUN apt-get update && apt-get install curl && \
   curl -sS https://getcomposer.org/installer | php \
   && chmod +x composer.phar && mv composer.phar /usr/local/bin/composer
+
+# Install blackfire.io
+RUN version=$(php -r "echo PHP_MAJOR_VERSION.PHP_MINOR_VERSION;") \
+    && curl -A "Docker" -o /tmp/blackfire-probe.tar.gz -D - -L -s https://blackfire.io/api/v1/releases/probe/php/linux/amd64/$version \
+    && mkdir -p /tmp/blackfire \
+    && tar zxpf /tmp/blackfire-probe.tar.gz -C /tmp/blackfire \
+    && mv /tmp/blackfire/blackfire-*.so $(php -r "echo ini_get('extension_dir');")/blackfire.so \
+    && printf "extension=blackfire.so\nblackfire.agent_socket=tcp://blackfire:8707\n" > $PHP_INI_DIR/conf.d/blackfire.ini \
+    && rm -rf /tmp/blackfire /tmp/blackfire-probe.tar.gz
+
+# Install nodejs and npm
+RUN apt-get update \
+  && apt-get -y install curl gnupg \
+  && curl -sL https://deb.nodesource.com/setup_11.x  | bash - \
+  && apt-get -y install nodejs \
+  && npm install
+
+# Install r.js
+RUN npm install -g requirejs
+
+# Install phantomjs
+RUN apt-get install build-essential chrpath libssl-dev libxft-dev libfreetype6-dev libfreetype6 libfontconfig1-dev libfontconfig1 -y \
+  && cd /tmp/ \
+  && wget https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-linux-x86_64.tar.bz2 \
+  && tar xvjf phantomjs-2.1.1-linux-x86_64.tar.bz2 -C /usr/local/share/ \
+  && ln -s /usr/local/share/phantomjs-2.1.1-linux-x86_64/bin/phantomjs /usr/local/bin/
